@@ -1,0 +1,10 @@
+@font-face {
+    font-family: 'DesktopPublishing';
+    src: url('font_DesktopPublishing.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+h1 {
+    font-family: 'DesktopPublishing';
+}
