@@ -11,14 +11,10 @@ icon_github = html.A(href='https://github.com/tushevg/syndive',
                      children=DashIconify(icon="mdi:github",
                     width=icon_size, height=icon_size, color='black'))
 
-header = dmc.Header(
+header = html.Div([dmc.Header([dmc.Burger(id="burger-button", opened=False),
+     html.H1('Synaptic diversity', style={'color':'#9400D3'}),
+    dmc.Group([icon_homepage, icon_github])],
     height=60,
-    style={"display": "flex", "align-items": "center",
-    "justify-content": "space-between", "padding": "16px"},
-    fixed=True,
-    children=[
-        dmc.Burger(id="burger-button", opened=False),
-        html.H1('Synaptic diversity', style={'color':'#9400D3'}),
-        dmc.Group([icon_homepage, icon_github])
-    ]
-)
+    style={"display": "flex", "alignItems": "center",
+    "justifyContent": "space-between", "padding": "16px"})
+])

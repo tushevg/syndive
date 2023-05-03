@@ -38,8 +38,8 @@ def create_table(df):
     return table
 
 
-db_file = 'data/rnaseq_cortex.db'
-db_table = 'deseq'
+db_file = 'data/mpibr_synprot.db'
+db_table = 'info'
 
 df = read_rows_from_db_table(db_file, db_table, 100, 10)
 table_html = create_table(df)

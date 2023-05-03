@@ -3,8 +3,7 @@ import sqlite3
 
 def print_table(table: pd.core.frame.DataFrame, label: str):
     print(label)
-    print("Column Name\tData Type")
-    print("------------------------")
+    print("column name\tdata type")
     for col in table.columns:
         print(f"{col}\t\t{table[col].dtype}")  
 
