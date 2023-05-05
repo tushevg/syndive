@@ -1,53 +1,33 @@
-import sqlite3
-import pandas as pd
 import dash_mantine_components as dmc
 from dash import html
 
-
-def read_rows_from_db_table(db_file, db_table, start_idx, num_rows):
-    conn = sqlite3.connect(db_file)
-    c = conn.cursor()
-    query = f"SELECT * FROM {db_table} LIMIT {num_rows} OFFSET {start_idx}"
-    c.execute(query)
-    results = c.fetchall()
-    column_names = [description[0] for description in c.description]
-    conn.close()
-    df = pd.DataFrame(results, columns=column_names)
-    return df
-
-
-def create_table(df):
-    def format_float(value, is_float):
-        if is_float:
-            return format(value, ".3f")
-        return value
-
-    # Define center-aligned style
+# create html table
+def create_table_info(df):
     center_style = {'textAlign': 'center'}
-
-    # Add style to the headers
-    header = [html.Tr([html.Th(col, style=center_style) for col in df.columns])]
+    #header = [html.Tr([html.Th(col, style=center_style) for col in df.columns])]
+    header = [html.Tr([html.Th('protein', style=center_style),
+                       html.Th('gene', style=center_style)])]
 
     rows = []
     for _, row in df.iterrows():
         # Add style to the cells
-        formatted_row = [html.Td(format_float(value, dtype == 'float64'), style=center_style) for value, dtype in zip(row, df.dtypes)]
+        protein = row['protein']
+        protein = html.Td(dmc.Anchor(protein, href=f"https://www.uniprot.org/uniprotkb/{protein}/entry"), style=center_style)
+        gene = html.Td(dmc.HoverCard(
+                    withArrow=True,
+                    width=200,
+                    shadow="md",
+                    closeDelay="100ms",
+                    children=[
+                        dmc.HoverCardTarget(dmc.Text(row['gene'])),
+                        dmc.HoverCardDropdown(dmc.Text(row['name'],size="sm"))],
+                        style=center_style))
+        formatted_row = [protein, gene]
         rows.append(html.Tr(formatted_row))
 
-    table = [html.Thead(header), html.Tbody(rows)]
+    table = dmc.Table(id='table-output',
+                    verticalSpacing="sm",
+                    horizontalSpacing="sm",
+                    highlightOnHover=True,
+                    children=[html.Thead(header), html.Tbody(rows)])
     return table
-
-
-db_file = 'data/mpibr_synprot.db'
-db_table = 'info'
-
-df = read_rows_from_db_table(db_file, db_table, 100, 10)
-table_html = create_table(df)
-
-table = html.Div([
-            html.Div([dmc.Table(verticalSpacing="sm",
-                                horizontalSpacing=10,
-                                children=table_html)],
-                                style={"width": "80%"})],
-        style={"display": "flex", "justifyContent": "center"})
-
