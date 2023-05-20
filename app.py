@@ -3,6 +3,7 @@ from dash import Dash, dcc, html, callback, Output, Input, State
 import dash_mantine_components as dmc
 import sqlite3
 import pandas as pd
+from fast_autocomplete import AutoComplete
 
 from layouts.header import header
 from layouts.footer import footer
@@ -12,8 +13,15 @@ from layouts.plot_enriched import plot_enriched
 from layouts.plot_expressed import plot_expressd
 from layouts.plot_cytoscape import plot_cytoscape
 from layouts.abstract import abstract
+from layouts.about import about
+from layouts.papers import papers
 
-app = Dash(__name__)
+
+external_stylesheets = [
+    "https://fonts.googleapis.com/css2?family=Roboto"
+]
+
+app = Dash(__name__, external_stylesheets=external_stylesheets)
 
 ### --- HELPER FUNCTIONS --- ###
 
@@ -39,6 +47,16 @@ def dbquery_find_term(search_term: str,
     conn.close()
     return df
 
+# database read genes
+def dbquery_read_column(db_column: str,
+                        db_table: str,
+                        db_file: str) -> pd.DataFrame:
+    query = f"SELECT {db_column} FROM {db_table}"
+    conn = sqlite3.connect(db_file)
+    df = pd.read_sql(query, conn)
+    conn.close()
+    return df[db_column].to_list()
+
 
 ### --- ALLOCATE DATA --- ###
 db_file = 'data/mpibr_synprot.db'
@@ -48,6 +66,10 @@ query_list = ['Gad1', 'Gad2', 'Dlg4',
 df_info = dbquery_find_list(query_list, 'gene', 'info', db_file)
 df_enriched = dbquery_find_list(df_info['protein'].to_list(), 'protein', 'enriched', db_file)
 df_expressed = dbquery_find_list(df_info['protein'].to_list(), 'protein', 'expressed', db_file)
+
+
+
+
 
 
 ### -- CREATE ELMENTS PROTOTYPES --- ###
@@ -61,27 +83,23 @@ app.layout = html.Div([
     dcc.Store(id='df-enriched', data=df_enriched.to_json()),
     dcc.Store(id='df-expressed', data=df_expressed.to_json()),
     header(),
-    dmc.Stack([dmc.Container(searchbar(),
-                style={"width": "40%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-                fluid=True),
-            dmc.Container(create_table_info(df_info),
-                style={"width": "40%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-                fluid=True),
-            dmc.Paper(dcc.Graph(id='plot-enriched', figure=fig_enriched),
-                style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-                shadow="sm"),
-            dmc.Paper(dmc.Stack([dmc.Center(dmc.Select(data=df_info['gene'].to_list(), id="select-term", value="Dlg4")),
+    dmc.Stack([about(),
+               papers(),
+               create_table_info(df_info),
+               dmc.Group([
+                       dmc.Paper(dmc.Stack([dmc.Center(dmc.Select(data=df_info['gene'].to_list(), id="select-term", value="Dlg4")),
                                  dcc.Graph(id='plot-expressed', figure=fig_expressed)]),
-                style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-                shadow="sm"),
+                                style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
+                                shadow="sm", withBorder=True),
+                       dmc.Paper(dcc.Graph(id='plot-enriched', figure=fig_enriched),
+                            style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
+                            shadow="sm", withBorder=True)
+               ],grow=True, spacing='lg'),
             dmc.Paper(plot_cytoscape(),
                 style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-                shadow="sm"),
-            dmc.Paper(abstract(),
-                style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-                shadow="sm")
+                shadow="sm", withBorder=True),
         ],
-    style={"alignItems": "center"}),
+    style={"alignItems": "center", "margin-top": 80}),
     footer()],
     style={"alignItems": "center"}
 )

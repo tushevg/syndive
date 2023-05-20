@@ -8,3 +8,17 @@
 h1 {
     font-family: 'DesktopPublishing';
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto');
+
+body {
+    font-family: 'Roboto';
+}
+
+.text-gradient {
+    background: linear-gradient(to top, #101010 0%, #707070 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }

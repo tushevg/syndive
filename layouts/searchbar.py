@@ -3,7 +3,11 @@ from dash import html
 from dash_iconify import DashIconify
 
 def searchbar():
-    return dmc.TextInput(id='search-term', 
+    return dmc.Select(id='search-term', 
                     placeholder='Search gene or protein',
-                    type='search',
-                    icon=DashIconify(icon="ci:search-magnifying-glass", flip='horizontal'))
+                    data=[],
+                    searchable=True,
+                    limit=20,
+                    clearable=True,
+                    icon=DashIconify(icon="ci:search-magnifying-glass", flip='horizontal'),
+                    style={"width": 400})

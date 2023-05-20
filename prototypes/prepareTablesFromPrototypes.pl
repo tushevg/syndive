@@ -126,8 +126,10 @@ sub parseExpressed($$$)
         elsif($tag eq "inhibitory") {
             $key = "Unsorted" if ($key eq "P2");
             $mouse = $key;
-            $brain = "Cortex";
+            $brain = "CorticalInterneurons";
         }
+
+        $mouse .= '-cre' if($mouse ne 'Unsorted');
 
         my $col_name = $brain . '.' . $mouse;
         push(@colnames, $col_name);
@@ -187,6 +189,7 @@ sub parseEnrichedExc($$)
         $group = fixBrainRegionsNaming($group);
         $group =~ s/\_/\./g;
         $group = "Striatum.Dat1" if ($group eq "Dat1.Dat1");
+        $group .= "-cre";
 
         $table_enriched->{"data"}{$protein}{$group}++;
         $table_enriched->{"header"}{$group}++;
@@ -207,7 +210,8 @@ sub parseEnrichedInh($$)
         my $protein = $line[1];
         my $group = $line[33];
         $group = fixBrainRegionsNaming($group);
-        $group = 'Cortex.' . $group;
+        $group = 'CorticalInterneurons.' . $group;
+        $group .= "-cre";
         $table_enriched->{"data"}{$protein}{$group}++;
         $table_enriched->{"header"}{$group}++;
     }
