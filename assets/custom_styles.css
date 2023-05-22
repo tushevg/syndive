@@ -25,10 +25,11 @@ body {
 
 .section {
     height: 100vh; /* Set the section height to full viewport height */
-    overflow-y: scroll; /* Enable vertical scrolling within the section */
+    /* overflow-y: scroll; */ /* Enable vertical scrolling within the section */
     display: flex;
     justify-items: center;
     align-items: center;
+    text-align: center;
 }
 
 

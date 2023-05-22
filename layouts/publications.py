@@ -1,6 +1,15 @@
 import dash_mantine_components as dmc
 from dash import html
 
+def text():
+    return dmc.Group([
+        dmc.Text('What are our resources?', align='center', size='xl', color='dark', weight=400),
+        dmc.Text('Read how we collect the data. Cite us.', align='center', size='lg', color='gray', weight=200)],
+        position='center',
+        align='center',
+        spacing='xl')
+
+
 def paper_card(paper_title: str,
                paper_authors: str,
                paper_journal: str,
@@ -16,10 +25,10 @@ def paper_card(paper_title: str,
                     height=200
                 )])
             ),
-            dmc.Text(paper_title, weight=500, align='center'),
+            dmc.Text(paper_title, size='md', weight=500, align='center'),
             dmc.Group(
                 [
-                    dmc.Text(paper_authors, size='xs', color='dimmed'),
+                    dmc.Text(paper_authors, size='xs', color='dark'),
                     dmc.Badge(dmc.Anchor(paper_journal, inherit=False, href=paper_href, color=paper_color), color=paper_color, variant='light'),
                 ],
                 position='apart',
@@ -28,8 +37,9 @@ def paper_card(paper_title: str,
             ),
             
             dmc.Text(paper_summary,
-                size='sm',
+                size='xs',
                 color='dimmed',
+                weight=200
             )
         ],
         withBorder=True,
@@ -39,9 +49,7 @@ def paper_card(paper_title: str,
         )
 
 
-
-
-def papers():
+def cards():
     # Paper 1
     paper_1 = paper_card(
         'The proteomic landscape of synaptic diversity across brain regions and cell types',
@@ -69,3 +77,17 @@ def papers():
         position="center",
         spacing="xl",
         style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"})
+
+
+
+def publications():
+    return html.Div(className='section',
+                    id='publications',
+                    children=dmc.Stack([
+                        text(),
+                        dmc.Group([], position='center')
+                    ],align='center', justify='center', spacing='xl')
+            )
+
+
+

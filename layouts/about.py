@@ -12,7 +12,7 @@ def title():
 
 def summary():
     text = 'A collection of transcripts and proteins localised to neurites and synapses of excitatory and inhibotory neurons. The data is published by the Schuman Lab at MPI for Brain Research.'
-    return dmc.Text(text, color='dimmed', align='center', weight='lighter',style={'max-width':'60%'})
+    return dmc.Text(text, color='dimmed', align='center', weight='lighter',style={'maxWidth':'60%'})
 
 
 def button_left():

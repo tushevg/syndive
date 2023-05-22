@@ -3,9 +3,10 @@ from dash import html
 from dash_iconify import DashIconify
 import datetime
 
+
 def logos():
-    logo_mpibrain = dmc.Image(src='../assets/logo_mpibrain.png', width=100)
-    logo_scic = dmc.Image(src='../assets/logo_scic.png', width=100)
+    logo_mpibrain = dmc.Anchor(dmc.Image(src='../assets/logo_mpibrain.png', width=100), href='https://brain.mpg.de/home')
+    logo_scic = dmc.Anchor(dmc.Image(src='../assets/logo_scic.png', width=100), href='https://brain.mpg.de/computing')
     return dmc.Group([logo_mpibrain, logo_scic], 
                      spacing='xl',
                      align='center',
@@ -27,25 +28,25 @@ def text():
 
 def icons():
     icon_size = 24
-    icon_homepage = html.A(href="https://brain.mpg.de/home",
-                        children=DashIconify(icon="fluent:brain-circuit-24-regular",
+    icon_gitlab = html.A(href="https://gitlab.mpcdf.mpg.de/mpibr",
+                        children=DashIconify(icon="mdi:gitlab",
                 width=icon_size, height=icon_size, color='black'))
 
     icon_github = html.A(href='https://github.com/tushevg/syndive',
                          children=DashIconify(icon="mdi:github",
                         width=icon_size, height=icon_size, color='black'))
     
-    return dmc.Group([icon_homepage, icon_github],
+    return dmc.Group([icon_gitlab, icon_github],
                      spacing='xl',
                      align='center',
                      position='right')
 
+
 def footer():
     return html.Div(dmc.Footer([
         dmc.Group([logos(), text(), icons()],
-                  position='center', spacing='xl', grow=True, style={'margin':'4em'})
-                ],
+                  position='center', spacing='xl', 
+                  grow=True, style={'margin':'4em'})],
                 height='15%',
                 position='bottom',
                 ))
-
