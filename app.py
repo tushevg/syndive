@@ -68,10 +68,6 @@ df_enriched = dbquery_find_list(df_info['protein'].to_list(), 'protein', 'enrich
 df_expressed = dbquery_find_list(df_info['protein'].to_list(), 'protein', 'expressed', db_file)
 
 
-
-
-
-
 ### -- CREATE ELMENTS PROTOTYPES --- ###
 #table_info = create_table_info(df_info)
 fig_enriched = plot_enriched(df_info, df_enriched)
@@ -83,26 +79,23 @@ app.layout = html.Div([
     dcc.Store(id='df-enriched', data=df_enriched.to_json()),
     dcc.Store(id='df-expressed', data=df_expressed.to_json()),
     header(),
-    dmc.Stack([about(),
-               papers(),
-               create_table_info(df_info),
-               dmc.Group([
-                       dmc.Paper(dmc.Stack([dmc.Center(dmc.Select(data=df_info['gene'].to_list(), id="select-term", value="Dlg4")),
-                                 dcc.Graph(id='plot-expressed', figure=fig_expressed)]),
-                                style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-                                shadow="sm", withBorder=True),
-                       dmc.Paper(dcc.Graph(id='plot-enriched', figure=fig_enriched),
-                            style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-                            shadow="sm", withBorder=True)
-               ],grow=True, spacing='lg'),
-            dmc.Paper(plot_cytoscape(),
-                style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-                shadow="sm", withBorder=True),
-        ],
-    style={"alignItems": "center", "margin-top": 80}),
-    footer()],
-    style={"alignItems": "center"}
+    about(),
+    papers(),
+    footer()]
 )
+
+
+# create_table_info(df_info),
+# dmc.Paper(dmc.Stack([dmc.Center(dmc.Select(data=df_info['gene'].to_list(), id="select-term", value="Dlg4")),
+# dcc.Graph(id='plot-expressed', figure=fig_expressed)]),
+# style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
+# shadow="sm", withBorder=True),
+# dmc.Paper(dcc.Graph(id='plot-enriched', figure=fig_enriched),
+# style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
+# shadow="sm", withBorder=True)
+# dmc.Paper(plot_cytoscape(),
+# style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
+# shadow="sm", withBorder=True),  
 
 
 ### --- CALLBACKS --- ###

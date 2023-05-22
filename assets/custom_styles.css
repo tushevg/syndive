@@ -16,9 +16,28 @@ body {
 }
 
 .text-gradient {
-    background: linear-gradient(to top, #101010 0%, #707070 100%);
+    background: linear-gradient(to top, #101010 0%, #808080 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
+}
+
+.section {
+    height: 100vh; /* Set the section height to full viewport height */
+    overflow-y: scroll; /* Enable vertical scrolling within the section */
+    display: flex;
+    justify-items: center;
+    align-items: center;
+}
+
+
+.hover-darken {
+    color: #909296; /* Set the initial color */
+    transition: color 0.3s; /* Add a transition for smooth animation */
   }
+  
+  .hover-darken:hover {
+    color: #101113; /* Set the darker color on hover */
+  }
+  

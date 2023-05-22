@@ -10,4 +10,4 @@ def searchbar():
                     limit=20,
                     clearable=True,
                     icon=DashIconify(icon="ci:search-magnifying-glass", flip='horizontal'),
-                    style={"width": 400})
+                    style={'width':'30%'})
