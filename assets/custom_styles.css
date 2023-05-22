@@ -27,7 +27,8 @@ body {
     height: 100vh; /* Set the section height to full viewport height */
     /* overflow-y: scroll; */ /* Enable vertical scrolling within the section */
     display: flex;
-    justify-items: center;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
     text-align: center;
 }

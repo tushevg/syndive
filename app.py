@@ -76,14 +76,15 @@ fig_enriched = plot_enriched(df_info, df_enriched)
 fig_expressed = plot_expressd(df_expressed, "Q62108")
 
 ### --- LAYOUT --- ###
-# dcc.Store(id='df-info', data=df_info.to_json()),
-# dcc.Store(id='df-enriched', data=df_enriched.to_json()),
-# dcc.Store(id='df-expressed', data=df_expressed.to_json()),
+
 app.layout = html.Div([
+    dcc.Store(id='df-info', data=df_info.to_json()),
+    dcc.Store(id='df-enriched', data=df_enriched.to_json()),
+    dcc.Store(id='df-expressed', data=df_expressed.to_json()),
     header(),
     about(),
     publications(),
-    dashboard(),
+    dashboard(df_info, df_enriched, df_expressed),
     exports(),
     footer()]
 )

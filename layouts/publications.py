@@ -3,11 +3,9 @@ from dash import html
 
 def text():
     return dmc.Group([
-        dmc.Text('What are our resources?', align='center', size='xl', color='dark', weight=400),
-        dmc.Text('Read how we collect the data. Cite us.', align='center', size='lg', color='gray', weight=200)],
-        position='center',
-        align='center',
-        spacing='xl')
+        dmc.Text('What are our resources?', size='xl', color='dark', weight=400),
+        dmc.Text('Read how we collect the data. Cite us.', size='lg', color='gray', weight=200)
+    ], align='center', position='center', spacing='xl', p='2em')
 
 
 def paper_card(paper_title: str,
@@ -46,6 +44,7 @@ def paper_card(paper_title: str,
         shadow='sm',
         radius='md',
         style={'width': 350},
+        p='1em'
         )
 
 
@@ -76,17 +75,16 @@ def cards():
         align="stretch",
         position="center",
         spacing="xl",
-        style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"})
+        p='2em')
+        #style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"})
 
 
 
 def publications():
     return html.Div(className='section',
                     id='publications',
-                    children=dmc.Stack([
-                        text(),
-                        dmc.Group([], position='center')
-                    ],align='center', justify='center', spacing='xl')
+                    children=dmc.Stack([text(),cards()],
+                    align='stretch', justify='center', spacing='xl')
             )
 
 
