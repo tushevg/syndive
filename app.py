@@ -15,6 +15,8 @@ from layouts.plot_cytoscape import plot_cytoscape
 from layouts.abstract import abstract
 from layouts.about import about
 from layouts.publications import publications
+from layouts.dashboard import dashboard
+from layouts.exports import exports
 
 
 external_stylesheets = [
@@ -80,7 +82,9 @@ fig_expressed = plot_expressd(df_expressed, "Q62108")
 app.layout = html.Div([
     header(),
     about(),
-    #publications(),
+    publications(),
+    dashboard(),
+    exports(),
     footer()]
 )
 

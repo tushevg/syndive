@@ -13,22 +13,17 @@ def logo():
 
 
 def menu_link(name: str, id: str):
-    return dmc.Anchor(name, 
-                      className='hover-darken',
-                      href=id, 
-                      size='md', 
-                      underline=False, 
-                      weight=200)
+    return html.A(dmc.Text(name, size='md', weight=200), className='hover-darken', href=id)
 
 
 def header():
     return html.Div(
         dmc.Header([dmc.Group([logo(),
                                dmc.Space(w='5%'),
-                    menu_link('About', 'about'),
-                    menu_link('Publications', 'publications'),
-                    menu_link('Dashboard', 'dashboard'),
-                    menu_link('Exports', 'exports')], 'position', 'left'),
+                    menu_link('About', '#about'),
+                    menu_link('Publications', '#publications'),
+                    menu_link('Dashboard', '#dashboard'),
+                    menu_link('Exports', '#exports')], 'position', 'left'),
                     searchbar()], 
                   position='top', fixed=True, height="8%",
                   style={"display": "flex", "alignItems": "center",
