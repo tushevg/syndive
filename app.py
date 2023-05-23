@@ -6,13 +6,14 @@ from fast_autocomplete import AutoComplete
 
 from layouts.header import header
 from layouts.footer import footer
-from layouts.plot_enriched import plot_enriched
-from layouts.plot_expressed import plot_expressd
-from layouts.plot_cytoscape import plot_cytoscape
 from layouts.about import about
 from layouts.publications import publications
 from layouts.dashboard import dashboard
 from layouts.exports import exports
+import layouts.dbtools as db
+from layouts.plots.plot_expressed import paper_expressed
+from layouts.plots.plot_enriched import paper_enriched
+from layouts.plots.plot_cytoscape import plot_cytoscape
 
 
 external_stylesheets = [
@@ -28,9 +29,12 @@ db_file = 'data/mpibr_synprot.db'
 query_list = ['Gad1', 'Gad2', 'Dlg4', 
                'Shank1', 'Psmc1', 'Psmd5', 'Psma7',
                'Psmc2', 'Th']
-# df_info = dbquery_find_list(query_list, 'gene', 'info', db_file)
-# df_enriched = dbquery_find_list(df_info['protein'].to_list(), 'protein', 'enriched', db_file)
-# df_expressed = dbquery_find_list(df_info['protein'].to_list(), 'protein', 'expressed', db_file)
+df_info = db.listToDataFrame(search_list=query_list, db_column='gene',
+                             db_table='info', db_file=db_file)
+df_enriched = db.listToDataFrame(search_list=df_info.index.to_list(), 
+                                 db_column='protein', db_table='enriched', db_file=db_file)
+df_expressed = db.listToDataFrame(search_list=df_info.index.to_list(), 
+                                  db_column='protein', db_table='expressed', db_file=db_file)
 
 
 ### -- CREATE ELMENTS PROTOTYPES --- ###
@@ -48,6 +52,9 @@ app.layout = html.Div([
     about(),
     publications(),
     dashboard(df_info, df_enriched, df_expressed),
+    dmc.Center(paper_expressed(df_info, df_expressed)),
+    dmc.Center(paper_enriched(df_info, df_enriched)),
+    dmc.Center(plot_cytoscape()),
     exports(),
     footer()]
 )

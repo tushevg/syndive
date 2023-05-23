@@ -22,6 +22,7 @@ df_info = db.listToDataFrame(search_list=query_list,
                              db_table='info',
                              db_file=db_file)
 print(len(df_info))
+print(df_info.index.to_list())
 print(df_info.loc[query_term])
 
 db.updateInfoCount(key=query_term, db_column='count', db_key_column='protein',
