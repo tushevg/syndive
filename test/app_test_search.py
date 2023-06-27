@@ -3,23 +3,13 @@ from dash.exceptions import PreventUpdate
 from dash_iconify import DashIconify
 import dash_mantine_components as dmc
 from fast_autocomplete import AutoComplete
-import json
-from typing import Dict
 
-## interact with JSON dictionary
-def autocomplete_export(words: Dict[str, Dict[str, str]], file_json: str):
-    with open(file_json, "w") as fp:
-        json.dump(words , fp)
+import sys
+sys.path.append('/Users/tushevg/Desktop/syndive')
+import layouts.dbtools as db
 
-
-def autocomplete_load(file_json: str) -> Dict[str, Dict[str, str]]:
-    with open(file_json, 'r') as fp:
-        words = json.load(fp)
-    return words
-
-words = autocomplete_load('data/autocomplete_info.json')
-auto_complete = AutoComplete(words=words)
-
+df_info = db.tableToDataFrame('info', 'data/mpibr_synprot.db')
+ac_info = db.infoToAutoComplete(df_info)
 
 app = Dash(__name__, prevent_initial_callbacks=True)
 
@@ -41,10 +31,7 @@ app.layout = html.Div([
 @app.callback(Output("search-bar", "data"),
           Input("search-bar", "searchValue"))
 def search_value(searchValue):
-    query = auto_complete.search(word=searchValue, max_cost=3, size=10)
-    list = []
-    for sublist in query:
-        list.append(sublist[-1])
+    list = db.matchAutoComplete(searchValue, ac_info)
     if (len(list) > 0):
         return list
     else:
@@ -56,11 +43,9 @@ def search_value(searchValue):
 def select_value(value):
     if not value:
         raise PreventUpdate
-    auto_complete.words[value]['count'] += 1
-    auto_complete.update_count_of_word(word=value, count=auto_complete.words[value]['count'])
-    #autocomplete_export(auto_complete.words[value])
-    gene = auto_complete.words[value]['gene']
-    return gene
+    key = db.keyAutoComplete(value, ac_info)
+    return key
+
 
 
 if __name__ == '__main__':

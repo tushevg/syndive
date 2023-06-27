@@ -91,7 +91,7 @@ def infoToAutoComplete(df_info: pd.DataFrame) -> AutoComplete:
 
 def matchAutoComplete(search_term: str, auto_complete: AutoComplete) -> list:
     nested_list = auto_complete.search(search_term, 3, 10)
-    flat_list = [item for sublist in nested_list for item in sublist]
+    flat_list = list(set([item for sublist in nested_list for item in sublist]))
     return flat_list
 
 

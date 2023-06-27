@@ -4,13 +4,13 @@ import dash_mantine_components as dmc
 from dash import dcc
 import re
 
-def plot_expressd(df_expressed, search_term):
+def plot_expressed(df_expressed, search_term):
     record = df_expressed.loc[search_term]
     list_regions = []
     list_celltypes = []
     list_values = []
     for key, value in record.items():
-        if value > 0:
+        if value > 0.0:
             key = re.sub(r'\.\d+$', '', key)
             region, celltype = str.split(key, sep='.')
             region = region.replace('CorticalInterneurons', 'Cortical IN')
@@ -49,9 +49,18 @@ def plot_expressd(df_expressed, search_term):
 
 
 def paper_expressed(df_info, df_expressed):
-    select_term=df_info['gene'].iloc[0]
-    search_term=df_info.index[0]
+    data = update_select_data(df_info)
+    select_term = data[0]['value']
     return dmc.Paper(dmc.Stack([
-        dmc.Center(dmc.Select(data=df_info['gene'].to_list(), id='select-term', value=select_term)),
-        dcc.Graph(id='plot-expressed', figure=plot_expressd(df_expressed, search_term))
+        dmc.Center(dmc.Select(data=data, id='select-term', value=select_term)),
+        dcc.Graph(id='plot-expressed', figure=plot_expressed(df_expressed, select_term))
     ]), shadow='sm', withBorder=True, p='sm', style={'width':'80%', 'margin': '2%'})
+
+
+def update_select_data(df_info):
+    data = []
+    for value, row in df_info.iterrows():
+        label = row['gene']
+        item = {'value': value, 'label': label}
+        data.append(item)
+    return data

@@ -1,5 +1,5 @@
 from dash import Dash, dcc, html, callback, Output, Input, State
-
+from dash.exceptions import PreventUpdate
 import dash_mantine_components as dmc
 import pandas as pd
 from fast_autocomplete import AutoComplete
@@ -11,9 +11,10 @@ from layouts.publications import publications
 from layouts.dashboard import dashboard
 from layouts.exports import exports
 import layouts.dbtools as db
-from layouts.plots.plot_expressed import paper_expressed
-from layouts.plots.plot_enriched import paper_enriched
+from layouts.plots.plot_expressed import paper_expressed, plot_expressed, update_select_data
+from layouts.plots.plot_enriched import paper_enriched, plot_enriched
 from layouts.plots.plot_cytoscape import plot_cytoscape
+from layouts.table import table
 
 
 external_stylesheets = [
@@ -35,19 +36,15 @@ df_enriched = db.listToDataFrame(search_list=df_info.index.to_list(),
                                  db_column='protein', db_table='enriched', db_file=db_file)
 df_expressed = db.listToDataFrame(search_list=df_info.index.to_list(), 
                                   db_column='protein', db_table='expressed', db_file=db_file)
-
-
-### -- CREATE ELMENTS PROTOTYPES --- ###
-# #table_info = create_table_info(df_info)
-# fig_enriched = plot_enriched(df_info, df_enriched)
-# fig_expressed = plot_expressd(df_expressed, "Q62108")
+df_info_full = db.tableToDataFrame(db_table='info', db_file=db_file)
+ac_info = db.infoToAutoComplete(df_info=df_info_full)
 
 ### --- LAYOUT --- ###
-
 app.layout = html.Div([
     dcc.Store(id='df-info', data=df_info.to_json()),
     dcc.Store(id='df-enriched', data=df_enriched.to_json()),
     dcc.Store(id='df-expressed', data=df_expressed.to_json()),
+    dcc.Store(id='selected-key', storage_type='memory'),
     header(),
     about(),
     publications(),
@@ -60,63 +57,113 @@ app.layout = html.Div([
 )
 
 
-# create_table_info(df_info),
-# dmc.Paper(dmc.Stack([dmc.Center(dmc.Select(data=df_info['gene'].to_list(), id="select-term", value="Dlg4")),
-# dcc.Graph(id='plot-expressed', figure=fig_expressed)]),
-# style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-# shadow="sm", withBorder=True),
-# dmc.Paper(dcc.Graph(id='plot-enriched', figure=fig_enriched),
-# style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-# shadow="sm", withBorder=True)
-# dmc.Paper(plot_cytoscape(),
-# style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"},
-# shadow="sm", withBorder=True),  
-
-
 # ### --- CALLBACKS --- ###
+@app.callback(Output("search-term", "data"),
+          Input("search-term", "searchValue"))
+def search_value(searchValue):
+    list = db.matchAutoComplete(searchValue, ac_info)
+    if (len(list) > 0):
+        return list
+    else:
+        raise PreventUpdate
 
-# # define a callback to update the dataframe        
-# @callback(
-#     [Output('df-info', 'data'),
-#      Output('df-enriched', 'data'),
-#      Output('df-expressed', 'data'),
-#      Output('table-output', 'children'),
-#      Output('plot-enriched', 'figure'),
-#      Output('select-term', 'data')],
-#     Input('search-term', 'n_submit'), # trigger
-#     State('df-info', 'data'),
-#     State('search-term', 'value'),
-#     prevent_initial_call=True
-# )
-# def search_data(n_submit, data, search_term):
-#     df = pd.read_json(data)
-#     df_query = df[(df['protein'] == search_term) | 
-#                   (df['gene'] == search_term)]
-#     if df_query.empty:
-#         df_query = dbquery_find_term(search_term, 'info', db_file)
-#         if not df_query.empty:
-#             df = pd.concat([df, df_query], ignore_index=True)
-#     table_html = create_table_info(df)
-#     df_enriched = dbquery_find_list(df['protein'].to_list(), 'protein', 'enriched', db_file)
-#     df_expressed = dbquery_find_list(df_info['protein'].to_list(), 'protein', 'expressed', db_file)
-#     return (df.to_json(), 
-#             df_enriched.to_json(), 
-#             df_expressed.to_json(),
-#             table_html, 
-#             plot_enriched(df, df_enriched),
-#             df['gene'].to_list())
 
-# @callback(Output('plot-expressed', 'figure'),
-#           Input('select-term', 'value'),
-#           State('df-info', 'data'),
-#           State('df-expressed', 'data'),
-#           prevent_initial_call=True
-# )
-# def select_value(value, data_info, data_expressed):
-#     df_info = pd.read_json(data_info)
-#     df_expressed = pd.read_json(data_expressed)
-#     search_term = df_info['protein'].loc[df_info['gene'] == value].iloc[0]
-#     return plot_expressd(df_expressed, search_term)
+@callback(Output("selected-key", "data"),
+          Input("search-term", "value"))
+def select_value(value):
+    if not value:
+        raise PreventUpdate
+    key = db.keyAutoComplete(value, ac_info)
+    db.updateInfoCount(key=key, 
+                       db_column='count', 
+                       db_key_column='protein',
+                       db_table='info',
+                       db_file=db_file)
+    return key
+
+
+@app.callback(
+    [
+        Output('df-info', 'data'),
+        Output('df-enriched', 'data'),
+        Output('df-expressed', 'data')
+    ],
+    Input('selected-key', 'data'),
+    State('df-info', 'data'),
+    State('df-enriched', 'data'),
+    State('df-expressed', 'data')
+)
+def update_data_frames(key, df_info_data, df_enriched_data, df_expressed_data):
+    if not key:
+        raise PreventUpdate
+    
+    # Convert the data frames from JSON back to pandas DataFrames
+    df_info = pd.read_json(df_info_data)
+    df_enriched = pd.read_json(df_enriched_data)
+    df_expressed = pd.read_json(df_expressed_data)
+
+    # check if key exists
+    if key in df_info.index:
+        raise PreventUpdate
+    
+    # skip if row limits reached
+    if df_info.shape[0] == 10:
+        raise PreventUpdate
+    
+    # find new rows
+    df_key_info = db.termToDataFrame(search_term=key, db_column='protein', db_table='info', db_file=db_file)
+    df_key_enriched = db.termToDataFrame(search_term=key, db_column='protein', db_table='enriched', db_file=db_file)
+    df_key_expressed = db.termToDataFrame(search_term=key, db_column='protein', db_table='expressed', db_file=db_file)
+    if df_key_info.empty:
+        raise PreventUpdate
+    
+    # concatenate rows
+    df_info = pd.concat([df_info, df_key_info])
+    df_enriched = pd.concat([df_enriched, df_key_enriched])
+    df_expressed = pd.concat([df_expressed, df_key_expressed])
+
+    return (df_info.to_json(),
+            df_enriched.to_json(),
+            df_expressed.to_json())
+
+
+@app.callback(
+    Output('data-table', 'children'),
+    Input('df-info', 'data')
+)
+def update_data_table(data):
+    df_info = pd.read_json(data)
+    table_html = table(df_info)
+    return table_html
+
+
+@app.callback(
+        Output('plot-enriched', 'figure'),
+        Input('df-enriched', 'data'),
+        State('df-info', 'data')
+)
+def update_plot_enriched(df_enriched_data, df_info_data):
+    df_enriched = pd.read_json(df_enriched_data)
+    df_info = pd.read_json(df_info_data)
+    return plot_enriched(df_info, df_enriched)
+
+
+@app.callback(
+        Output('select-term', 'data'),
+        Input('df-info', 'data')
+)
+def update_plot_expressed_list(df_info_data):
+    df_info = pd.read_json(df_info_data)
+    return update_select_data(df_info)
+
+
+@callback(Output('plot-expressed', 'figure'),
+          Input('select-term', 'value'),
+          State('df-expressed', 'data')
+)
+def select_value(key, df_expressed_data):
+    df_expressed = pd.read_json(df_expressed_data)
+    return plot_expressed(df_expressed, key)
 
 
 if __name__ == '__main__':
