@@ -52,8 +52,8 @@ app.layout = html.Div([
     dashboard(df_info),
     dmc.Center(paper_expressed(df_info, df_expressed)),
     dmc.Center(paper_enriched(df_info, df_enriched)),
-    dmc.Center(plot_cytoscape()),
-    exports(),
+    #dmc.Center(plot_cytoscape()),
+    #exports(),
     footer()]
 )
 
@@ -201,4 +201,4 @@ def update_plot_enriched(df_info_data, df_enriched_data):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=8051)
