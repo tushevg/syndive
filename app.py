@@ -1,8 +1,9 @@
-from dash import Dash, dcc, html, callback, Output, Input, State
+from dash import Dash, dcc, html, callback, Output, Input, State, ctx, ALL
 from dash.exceptions import PreventUpdate
 import dash_mantine_components as dmc
 import pandas as pd
 from fast_autocomplete import AutoComplete
+
 
 from layouts.header import header
 from layouts.footer import footer
@@ -14,14 +15,14 @@ import layouts.dbtools as db
 from layouts.plots.plot_expressed import paper_expressed, plot_expressed, update_select_data
 from layouts.plots.plot_enriched import paper_enriched, plot_enriched
 from layouts.plots.plot_cytoscape import plot_cytoscape
-from layouts.table import table
+from layouts.table import table_create
 
 
 external_stylesheets = [
     "https://fonts.googleapis.com/css2?family=Roboto"
 ]
 
-app = Dash(__name__, external_stylesheets=external_stylesheets)
+app = Dash(__name__, external_stylesheets=external_stylesheets, prevent_initial_callbacks=True)
 
 
 
@@ -48,7 +49,7 @@ app.layout = html.Div([
     header(),
     about(),
     publications(),
-    dashboard(df_info, df_enriched, df_expressed),
+    dashboard(df_info),
     dmc.Center(paper_expressed(df_info, df_expressed)),
     dmc.Center(paper_enriched(df_info, df_enriched)),
     dmc.Center(plot_cytoscape()),
@@ -58,6 +59,10 @@ app.layout = html.Div([
 
 
 # ### --- CALLBACKS --- ###
+
+## ---
+## update search list based on auto complete
+## ---
 @app.callback(Output("search-term", "data"),
           Input("search-term", "searchValue"))
 def search_value(searchValue):
@@ -68,6 +73,9 @@ def search_value(searchValue):
         raise PreventUpdate
 
 
+## ---
+## select a value from search list
+## ---
 @callback(Output("selected-key", "data"),
           Input("search-term", "value"))
 def select_value(value):
@@ -82,6 +90,9 @@ def select_value(value):
     return key
 
 
+## ---
+## update data frames based on selected gene or deleted row
+## ---
 @app.callback(
     [
         Output('df-info', 'data'),
@@ -89,74 +100,83 @@ def select_value(value):
         Output('df-expressed', 'data')
     ],
     Input('selected-key', 'data'),
+    Input({'type':'remove-button', 'index': ALL}, "n_clicks"),
     State('df-info', 'data'),
     State('df-enriched', 'data'),
     State('df-expressed', 'data')
 )
-def update_data_frames(key, df_info_data, df_enriched_data, df_expressed_data):
-    if not key:
-        raise PreventUpdate
-    
-    # Convert the data frames from JSON back to pandas DataFrames
+def update_data_frames(key, n_clicks, df_info_data, df_enriched_data, df_expressed_data):
+
+    # convert json to data.frame
     df_info = pd.read_json(df_info_data)
     df_enriched = pd.read_json(df_enriched_data)
     df_expressed = pd.read_json(df_expressed_data)
 
-    # check if key exists
-    if key in df_info.index:
-        raise PreventUpdate
+    # retrieve current trigger
+    triggered_id = ctx.triggered_id
+
+    if isinstance(triggered_id, str):
+        if triggered_id != 'selected-key':
+            raise PreventUpdate
+        
+        if not key:
+            raise PreventUpdate
+        
+        if key in df_info.index:
+            raise PreventUpdate
+        
+        if df_info.shape[0] == 15:
+            raise PreventUpdate
+        
+        # find new rows
+        df_key_info = db.termToDataFrame(search_term=key, db_column='protein', db_table='info', db_file=db_file)
+        df_key_enriched = db.termToDataFrame(search_term=key, db_column='protein', db_table='enriched', db_file=db_file)
+        df_key_expressed = db.termToDataFrame(search_term=key, db_column='protein', db_table='expressed', db_file=db_file)
+        if df_key_info.empty:
+            raise PreventUpdate
+        
+        # concatenate rows
+        df_info = pd.concat([df_info, df_key_info])
+        df_enriched = pd.concat([df_enriched, df_key_enriched])
+        df_expressed = pd.concat([df_expressed, df_key_expressed])
+        
+    else:
+        triggered_key = triggered_id['index']
+        if df_info.shape[0] == 1:
+            raise PreventUpdate
+        
+        df_info = df_info.drop(triggered_key)
+        df_enriched = df_enriched.drop(triggered_key)
+        df_expressed = df_expressed.drop(triggered_key)
     
-    # skip if row limits reached
-    if df_info.shape[0] == 10:
-        raise PreventUpdate
-    
-    # find new rows
-    df_key_info = db.termToDataFrame(search_term=key, db_column='protein', db_table='info', db_file=db_file)
-    df_key_enriched = db.termToDataFrame(search_term=key, db_column='protein', db_table='enriched', db_file=db_file)
-    df_key_expressed = db.termToDataFrame(search_term=key, db_column='protein', db_table='expressed', db_file=db_file)
-    if df_key_info.empty:
-        raise PreventUpdate
-    
-    # concatenate rows
-    df_info = pd.concat([df_info, df_key_info])
-    df_enriched = pd.concat([df_enriched, df_key_enriched])
-    df_expressed = pd.concat([df_expressed, df_key_expressed])
+    df_info = df_info.sort_values('gene')
 
     return (df_info.to_json(),
             df_enriched.to_json(),
             df_expressed.to_json())
 
 
+## ---
+## update info dependent data
+## ---
 @app.callback(
-    Output('data-table', 'children'),
-    Input('df-info', 'data')
-)
-def update_data_table(data):
-    df_info = pd.read_json(data)
-    table_html = table(df_info)
-    return table_html
-
-
-@app.callback(
-        Output('plot-enriched', 'figure'),
-        Input('df-enriched', 'data'),
-        State('df-info', 'data')
-)
-def update_plot_enriched(df_enriched_data, df_info_data):
-    df_enriched = pd.read_json(df_enriched_data)
-    df_info = pd.read_json(df_info_data)
-    return plot_enriched(df_info, df_enriched)
-
-
-@app.callback(
+    [
+        Output('table-info', 'children'),
         Output('select-term', 'data'),
-        Input('df-info', 'data')
+        Output('select-term', 'value')
+    ],
+    Input('df-info', 'data')
 )
 def update_plot_expressed_list(df_info_data):
     df_info = pd.read_json(df_info_data)
-    return update_select_data(df_info)
+    return (table_create(df_info),
+        update_select_data(df_info),
+        df_info.index[0])
 
 
+## ---
+## update plot expressed figure
+## ---
 @callback(Output('plot-expressed', 'figure'),
           Input('select-term', 'value'),
           State('df-expressed', 'data')
@@ -164,6 +184,20 @@ def update_plot_expressed_list(df_info_data):
 def select_value(key, df_expressed_data):
     df_expressed = pd.read_json(df_expressed_data)
     return plot_expressed(df_expressed, key)
+
+
+## ---
+## update plot enriched figure
+## ---
+@app.callback(
+        Output('plot-enriched', 'figure'),
+        Input('df-info', 'data'),
+        State('df-enriched', 'data')
+)
+def update_plot_enriched(df_info_data, df_enriched_data):
+    df_info = pd.read_json(df_info_data)
+    df_enriched = pd.read_json(df_enriched_data)
+    return plot_enriched(df_info, df_enriched)
 
 
 if __name__ == '__main__':

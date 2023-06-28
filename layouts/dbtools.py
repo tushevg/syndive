@@ -26,6 +26,7 @@ def listToDataFrame(search_list: list,
     df = pd.read_sql(query, conn, params=search_list)
     conn.close()
     df.set_index(df.columns[0], inplace=True)
+    df.sort_values(by=db_column, inplace=True)
 
     return df
 

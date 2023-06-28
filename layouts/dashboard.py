@@ -1,7 +1,7 @@
 import dash_mantine_components as dmc
 from dash import html
 import pandas as pd
-from layouts.table import table
+from layouts.table import table_create
 
 def text():
     return dmc.Group([
@@ -10,11 +10,9 @@ def text():
     ], align='center', position='center', spacing='xl', p='2em')
 
 
-def dashboard(df_info: pd.DataFrame,
-              df_enriched: pd.DataFrame,
-              df_expressed: pd.DataFrame) -> html.Div:
+def dashboard(df_info: pd.DataFrame) -> html.Div:
     return html.Div(className='section',
                     id='dashboard',
-                    children=dmc.Stack([text(), table(df_info)],
+                    children=dmc.Stack([text(), table_create(df_info)],
                             align='center', justify='center', spacing='xl'))
             
