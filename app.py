@@ -22,8 +22,11 @@ from layouts.table import table_create
 external_stylesheets = [
     "https://fonts.googleapis.com/css2?family=Roboto"
 ]
-
-app = Dash(__name__, external_stylesheets=external_stylesheets, prevent_initial_callbacks=True)
+url_custom_path = '/syndive'
+app = Dash(__name__, 
+           external_stylesheets=external_stylesheets, 
+           prevent_initial_callbacks=True,
+           requests_pathname_prefix=url_custom_path + '/')
 
 
 
