@@ -1,9 +1,10 @@
 from dash import Dash, dcc, html, callback, Output, Input, State, ctx, ALL
 from dash.exceptions import PreventUpdate
-#from dash_extensions.enrich import DashProxy, html, Output, Input, dcc
 import dash_mantine_components as dmc
 import pandas as pd
 from fast_autocomplete import AutoComplete
+import logging
+import os
 
 
 from layouts.header import header
@@ -22,13 +23,17 @@ from layouts.table import table_create
 external_stylesheets = [
     "https://fonts.googleapis.com/css2?family=Roboto"
 ]
-url_custom_path = '/syndive'
+
+url_custom_path = os.getenv('SYNDIVE_URLPATH', '')
+if not url_custom_path.endswith('/'):
+    url_custom_path = url_custom_path + '/'
+
 app = Dash(__name__, 
            external_stylesheets=external_stylesheets, 
            prevent_initial_callbacks=True,
-           requests_pathname_prefix=url_custom_path + '/')
+           requests_pathname_prefix=url_custom_path)
 
-
+logging.basicConfig(filename='syndive_app.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 ### --- ALLOCATE DATA --- ###
 db_file = 'data/mpibr_synprot.db'
