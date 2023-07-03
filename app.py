@@ -3,7 +3,6 @@ from dash.exceptions import PreventUpdate
 #from dash_extensions.enrich import DashProxy, html, Output, Input, dcc
 import dash_mantine_components as dmc
 import pandas as pd
-import urllib
 from fast_autocomplete import AutoComplete
 
 

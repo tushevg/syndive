@@ -1,0 +1,6 @@
+dash
+dash-mantine-components
+dash-iconify
+pandas
+fast-autocomplete
+python-Levenshtein
