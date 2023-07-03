@@ -1,7 +1,9 @@
 from dash import Dash, dcc, html, callback, Output, Input, State, ctx, ALL
 from dash.exceptions import PreventUpdate
+#from dash_extensions.enrich import DashProxy, html, Output, Input, dcc
 import dash_mantine_components as dmc
 import pandas as pd
+import urllib
 from fast_autocomplete import AutoComplete
 
 
@@ -53,8 +55,9 @@ app.layout = html.Div([
     dmc.Center(paper_expressed(df_info, df_expressed)),
     dmc.Center(paper_enriched(df_info, df_enriched)),
     #dmc.Center(plot_cytoscape()),
-    #exports(),
-    footer()]
+    exports(),
+    footer(),
+    dcc.Download(id='download')]
 )
 
 
@@ -100,7 +103,7 @@ def select_value(value):
         Output('df-expressed', 'data')
     ],
     Input('selected-key', 'data'),
-    Input({'type':'remove-button', 'index': ALL}, "n_clicks"),
+    Input({'type':'remove-button', 'index': ALL}, 'n_clicks'),
     State('df-info', 'data'),
     State('df-enriched', 'data'),
     State('df-expressed', 'data')
@@ -199,6 +202,44 @@ def update_plot_enriched(df_info_data, df_enriched_data):
     df_enriched = pd.read_json(df_enriched_data)
     return plot_enriched(df_info, df_enriched)
 
+
+
+## ---
+## export data frames to csv files
+## ---
+@app.callback(
+    Output('download', 'data'),
+    Input({'type':'export-button', 'index': ALL}, 'n_clicks'),
+    State('df-info', 'data'),
+    State('df-enriched', 'data'),
+    State('df-expressed', 'data')
+)
+def export_info(n_clicks, df_info_data, df_enriched_data, df_expressed_data):
+    if n_clicks == 0:
+        PreventUpdate
+
+    triggered_id = ctx.triggered_id['index']
+    
+    if triggered_id == 'export-info':
+        df = pd.read_json(df_info_data)
+        df = df[['gene', 'product']]
+        file_out = 'syndive_proteinInfo.csv'
+    elif triggered_id == 'export-enrichment':
+        df = pd.read_json(df_enriched_data)
+        file_out = 'syndive_proteinEnriched.csv'
+        PreventUpdate
+    elif triggered_id == 'export-abundance':
+        df = pd.read_json(df_expressed_data)
+        file_out = 'syndive_proteinExpressed.csv'
+        PreventUpdate
+    else:
+        PreventUpdate
+
+    df = df.reset_index().rename(columns={'index':'protein'})
+    return dict(content=df.to_csv(index=False, encoding='utf-8'), 
+                 filename=file_out, type='text/csv')
+
+    
 
 if __name__ == '__main__':
     app.run_server(debug=True, port=8051)
