@@ -1,0 +1,13 @@
+[Unit]
+Description=syndive
+After=network.target
+
+[Service]
+User=scic
+Restart=on-failure
+WorkingDirectory=/home/scic/dashapps/syndive/
+Environment="SYNDIVE_URLPATH=/"
+ExecStart=/home/scic/dashapps/syndive/venv/bin/gunicorn -c /home/scic/dashapps/syndive/deployment/gunicorn_config.py -w 4 --bind 127.0.0.1:8051 app:server
+
+[Install]
+WantedBy=multi-user.target
