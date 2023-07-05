@@ -3,7 +3,7 @@ from dash.exceptions import PreventUpdate
 import dash_mantine_components as dmc
 import pandas as pd
 from fast_autocomplete import AutoComplete
-import logging
+#import logging
 import os
 
 
@@ -32,8 +32,9 @@ app = Dash(__name__,
            external_stylesheets=external_stylesheets, 
            prevent_initial_callbacks=True,
            requests_pathname_prefix=url_custom_path)
+server = app.server
 
-logging.basicConfig(filename='syndive_app.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+#logging.basicConfig(filename='syndive_app.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 ### --- ALLOCATE DATA --- ###
 db_file = 'data/mpibr_synprot.db'
@@ -249,4 +250,4 @@ def export_info(n_clicks, df_info_data, df_enriched_data, df_expressed_data):
     
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8051)
+    app.run(debug=True, port=8051)
