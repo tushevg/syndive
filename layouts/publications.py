@@ -71,7 +71,7 @@ def cards():
         'assets/fig_caspar.png'
     )
 
-    return dmc.Group([paper_1, paper_2],
+    return dmc.Group([paper_1,],
         align="stretch",
         position="center",
         spacing="xl",

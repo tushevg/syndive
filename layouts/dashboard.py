@@ -6,7 +6,7 @@ from layouts.table import table_create
 def text():
     return dmc.Group([
         dmc.Text('How to use the dashboard?', size='xl', color='dark', weight=400),
-        dmc.Text('Search for a gene or a protein. Add it to the candidates. Explore its localisation.', size='lg', color='gray', weight=200)
+        dmc.Text('Search for a gene or a protein. Add it to the candidates. Explore its localisation across synapse types.', size='lg', color='gray', weight=200)
     ], align='center', position='center', spacing='xl', p='2em')
 
 

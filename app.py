@@ -3,9 +3,7 @@ from dash.exceptions import PreventUpdate
 import dash_mantine_components as dmc
 import pandas as pd
 from fast_autocomplete import AutoComplete
-#import logging
 import os
-
 
 from layouts.header import header
 from layouts.footer import footer
@@ -34,13 +32,10 @@ app = Dash(__name__,
            requests_pathname_prefix=url_custom_path)
 server = app.server
 
-#logging.basicConfig(filename='syndive_app.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
-
 ### --- ALLOCATE DATA --- ###
 db_file = 'data/mpibr_synprot.db'
-query_list = ['Gad1', 'Gad2', 'Dlg4', 
-               'Shank1', 'Psmc1', 'Psmd5', 'Psma7',
-               'Psmc2', 'Th']
+query_list = ['Gad1', 'Gad2', 'Slc32a1', 'Slc17a7',
+               'Shank1', 'Syt2', 'Th']
 df_info = db.listToDataFrame(search_list=query_list, db_column='gene',
                              db_table='info', db_file=db_file)
 df_enriched = db.listToDataFrame(search_list=df_info.index.to_list(), 

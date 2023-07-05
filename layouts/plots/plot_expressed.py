@@ -35,7 +35,7 @@ def plot_expressed(df_expressed, search_term):
     fig = px.box(df, x='regions', y='values', 
                 color='cell type',
                 color_discrete_map=color_map,
-                title='Abundance',
+                title='Synaptic Abundance',
                 category_orders={'regions': list_unq_region, 'mouse line': list_unq_mouse},
                 template='plotly_white')
 

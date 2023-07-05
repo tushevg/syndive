@@ -53,7 +53,7 @@ def plot_enriched(df_info, df_enriched):
     label_x[1] = 'Cortical IN'
     
     fig = px.scatter(df, x='x', y='y', color='mouse line', opacity=0.8,
-                    title='Enrichment',
+                    title='Synapse-Type Enrichment',
                     category_orders={'mouse line': list_unq_mouse},
                     color_discrete_map=color_map,
                     template='plotly_white',
