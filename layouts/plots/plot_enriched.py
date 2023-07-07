@@ -58,7 +58,7 @@ def plot_enriched(df_info, df_enriched):
                     color_discrete_map=color_map,
                     template='plotly_white',
                     hover_name = 'gene',
-                    hover_data={'region':True,'x':False,'mouse line':True, 'gene':False})
+                    hover_data={'region':True,'x':False,'mouse line':True, 'gene':True, 'y':False})
 
     fig.update_layout(xaxis=dict(tickmode="array", tickvals=np.arange(0, len(label_x)) + 1,
                                 ticktext=label_x),
@@ -67,8 +67,10 @@ def plot_enriched(df_info, df_enriched):
                     xaxis_range=[0.3, 6.7],
                     yaxis_range=[-0.5, len(label_y) - 0.5],
                     xaxis_title='',
-                    yaxis_title='gene',
+                    yaxis_title='gene'
                     )
+    
+    #fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
     for vidx in range(len(label_x)+1):
         fig.add_vline(x=vidx + .5, line_color='grey', line_width=0.5)

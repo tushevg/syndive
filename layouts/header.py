@@ -17,7 +17,7 @@ def menu_link(name: str, id: str):
 
 
 def header():
-    return html.Div(
+    return html.Div([
         dmc.Header([dmc.Group([logo(),
                                dmc.Space(w='5%'),
                     menu_link('About', '#about'),
@@ -29,4 +29,6 @@ def header():
                   style={"display": "flex", "alignItems": "center",
               "justifyContent": "space-between", "padding": "2%",
               "background": "rgba(255, 255, 255, 0.95)"})
+    ],
+    id="header-wrapper"
     )

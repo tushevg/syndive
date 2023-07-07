@@ -74,7 +74,7 @@ def cards():
     return dmc.Group([paper_1,],
         align="stretch",
         position="center",
-        spacing="xl",
+        spacing="sm",
         p='2em')
         #style={"width": "90%", "marginTop": 20,"marginBottom": 20, "alignItems": "center"})
 
@@ -84,7 +84,7 @@ def publications():
     return html.Div(className='section',
                     id='publications',
                     children=dmc.Stack([text(),cards()],
-                    align='stretch', justify='center', spacing='xl')
+                    align='stretch', justify='center', spacing='sm')
             )
 
 

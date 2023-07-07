@@ -24,13 +24,13 @@ body {
 }
 
 .section {
-    height: 100vh; /* Set the section height to full viewport height */
-    /* overflow-y: scroll; */ /* Enable vertical scrolling within the section */
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
+    margin-bottom: 10%;
 }
 
 
@@ -44,3 +44,16 @@ body {
     color: #101113; /* Set the darker color on hover */
   }
   
+
+  @media only screen and (max-width: 480px) {
+    #header-wrapper {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 2% 1%;
+        height: auto;
+    }
+
+    #header-wrapper .dm-space {
+        display: none;
+    }
+}
