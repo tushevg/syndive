@@ -3,6 +3,7 @@ from dash.exceptions import PreventUpdate
 import dash_mantine_components as dmc
 import pandas as pd
 from fast_autocomplete import AutoComplete
+from urllib.parse import urlparse, urlunparse
 import os
 
 from layouts.header import header
@@ -47,6 +48,7 @@ ac_info = db.infoToAutoComplete(df_info=df_info_full)
 
 ### --- LAYOUT --- ###
 app.layout = html.Div([
+    dcc.Location(id='url', refresh=False),
     dcc.Store(id='df-info', data=df_info.to_json()),
     dcc.Store(id='df-enriched', data=df_enriched.to_json()),
     dcc.Store(id='df-expressed', data=df_expressed.to_json()),
@@ -69,9 +71,11 @@ app.layout = html.Div([
 ## ---
 ## update search list based on auto complete
 ## ---
-@app.callback(Output("search-term", "data"),
-          Input("search-term", "searchValue"))
-def search_value(searchValue):
+@app.callback(
+    Output("search-term", "data"),
+    Input("search-term", "searchValue")
+)
+def search_term(searchValue):
     list = db.matchAutoComplete(searchValue, ac_info)
     if (len(list) > 0):
         return list
@@ -82,9 +86,11 @@ def search_value(searchValue):
 ## ---
 ## select a value from search list
 ## ---
-@callback(Output("selected-key", "data"),
-          Input("search-term", "value"))
-def select_value(value):
+@callback(
+    Output("selected-key", "data"),
+    Input("search-term", "value")
+)
+def select_term(value):
     if not value:
         raise PreventUpdate
     key = db.keyAutoComplete(value, ac_info)
@@ -93,6 +99,7 @@ def select_value(value):
                        db_key_column='protein',
                        db_table='info',
                        db_file=db_file)
+    
     return key
 
 
@@ -183,9 +190,10 @@ def update_plot_expressed_list(df_info_data):
 ## ---
 ## update plot expressed figure
 ## ---
-@callback(Output('plot-expressed', 'figure'),
-          Input('select-term', 'value'),
-          State('df-expressed', 'data')
+@callback(
+    Output('plot-expressed', 'figure'),
+    Input('select-term', 'value'),
+    State('df-expressed', 'data')
 )
 def select_value(key, df_expressed_data):
     df_expressed = pd.read_json(df_expressed_data)
@@ -196,9 +204,9 @@ def select_value(key, df_expressed_data):
 ## update plot enriched figure
 ## ---
 @app.callback(
-        Output('plot-enriched', 'figure'),
-        Input('df-info', 'data'),
-        State('df-enriched', 'data')
+    Output('plot-enriched', 'figure'),
+    Input('df-info', 'data'),
+    State('df-enriched', 'data')
 )
 def update_plot_enriched(df_info_data, df_enriched_data):
     df_info = pd.read_json(df_info_data)

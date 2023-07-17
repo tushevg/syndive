@@ -1,7 +1,9 @@
 .DS_Store
 *__pycache__*
 venv/
-data/
-#test/
 *.ipynb_checkpoints
 *.log
+*.csv
+*.gz
+*.db
+*.tsv

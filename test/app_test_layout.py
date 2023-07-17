@@ -6,42 +6,22 @@ import pandas as pd
 from fast_autocomplete import AutoComplete
 import os
 
-import sys
-sys.path.append('/Users/tushevg/Desktop/syndive')
+# Get the absolute path to the current file
+#current_path = os.path.dirname(os.path.abspath(__file__))
+# Construct the path to the styles.css file
+#styles_path = os.path.join(current_path, '../prototypes/styles.css')
 
 
 app = Dash(__name__, prevent_initial_callbacks=True)
 
-app.layout = html.Div(children = [
-    dcc.Location(id='url', refresh=False),
-    html.Div('no-size', id='print-size')
-    ])
 
-
-app.clientside_callback(
-    """
-       function(href) {
-            function updateSize() {
-                var w = window.innerWidth;
-                return w;
-            }
-      
-            // Update size on initial page load
-            if (href === window.location.href) {
-                return updateSize();
-            }
-
-            // Update size on browser window resize
-            window.addEventListener('resize', function() {
-                var size = updateSize();
-                document.getElementById('print-size').innerText = size;
-            });
-        }
-    """,
-    Output('print-size', 'children'),
-    Input('url', 'href')
+app.layout = html.Div(
+    className="app-container",
+    children=[
+        html.Div(dmc.Text("PannelA"), className="section dark"),
+        html.Div(dmc.Text("PannelB"), className="section light")
+    ]
 )
-
 
 if __name__ == '__main__':
     app.run(debug=True)

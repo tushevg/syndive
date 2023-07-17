@@ -1,0 +1,11 @@
+SST: #F3A1AE
+VIP: #B77CA3
+PV: #D15196
+
+Camk2a: #C3BE04
+Gad2: #E94879
+Syn1: #AAD4AC
+Dat: #409E36
+
+Module colours for the network:
+"#66C5CC" "#DFCD7F" "#F7AB73" "#E8A6B7" "#BBB8B9" "#8CC281" "#A5B5ED" "#F68BB6" "#D5C782" "#A2DE91" "#9DBEC2" "#BD9FC8" "#CEB38B" "#B3B3B3"
