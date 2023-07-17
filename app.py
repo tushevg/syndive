@@ -32,11 +32,35 @@ app = Dash(__name__,
            prevent_initial_callbacks=True,
            requests_pathname_prefix=url_custom_path)
 server = app.server
+app.title = 'syndive'
+    
+# Modify the index_string property to include the GTM code
+app.index_string = """<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-JVVZRMCR6P"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
 
-### --- add google analytics --- ###
-def get_gtm_code():
-    with open('assets/gtag.html', 'r') as file:
-        return file.read()
+            gtag('config', 'G-JVVZRMCR6P');
+        </script>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>"""
 
 
 ### --- ALLOCATE DATA --- ###
@@ -59,7 +83,6 @@ app.layout = html.Div([
     dcc.Store(id='df-enriched', data=df_enriched.to_json()),
     dcc.Store(id='df-expressed', data=df_expressed.to_json()),
     dcc.Store(id='selected-key', storage_type='memory'),
-    html.Script(get_gtm_code()),
     header(),
     about(),
     publications(),
@@ -71,7 +94,6 @@ app.layout = html.Div([
     footer(),
     dcc.Download(id='download')]
 )
-
 
 # ### --- CALLBACKS --- ###
 
