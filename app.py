@@ -33,6 +33,12 @@ app = Dash(__name__,
            requests_pathname_prefix=url_custom_path)
 server = app.server
 
+### --- add google analytics --- ###
+def get_gtm_code():
+    with open('assets/gtag.html', 'r') as file:
+        return file.read()
+
+
 ### --- ALLOCATE DATA --- ###
 db_file = 'data/mpibr_synprot.db'
 query_list = ['Gad1', 'Gad2', 'Slc32a1', 'Slc17a7',
@@ -53,6 +59,7 @@ app.layout = html.Div([
     dcc.Store(id='df-enriched', data=df_enriched.to_json()),
     dcc.Store(id='df-expressed', data=df_expressed.to_json()),
     dcc.Store(id='selected-key', storage_type='memory'),
+    html.Script(get_gtm_code()),
     header(),
     about(),
     publications(),
