@@ -10,18 +10,24 @@ sub printTableEnriched($$);
 sub parseExpressed($$$);
 sub printTableExpressed($$$$);
 
+sub parseFoldChange($$);
+sub printTableFoldChange($$);
+
 sub fixBrainRegionsNaming($);
 
 
 main:{
     my %table_enriched = ();
     my %table_expressed = ();
+    my %table_foldchange = ();
     my $file_enriched_exc = 'data/prototypes/Synapse_enriched_v3_lookup.csv';
     my $file_enriched_inh = 'data/prototypes/cort_inh_lookup_extended.csv';
     my $file_expressed_exc = 'data/prototypes/20211203_001810_Spectronaut 15 - BR3 libv2 - v10_Report.xls - v10 interact all comparisons SampleQuantification.csv';
     my $file_expressed_inh = 'data/prototypes/20211206_165624_Cortical inhibitory cleanup-free lib1 v2_paired SampleQuantification.csv';
     my $file_out_enriched = 'data/tableEnriched.csv';
     my $file_out_expressed = 'data/tableExpressed.csv';
+    my $file_fc_exc = 'data/prototypes/FC_SQ_scaled.csv';
+    my $file_out_fc = 'data/tableFoldChange.csv';
     
     parseEnrichedExc(\%table_enriched, $file_enriched_exc);
     parseEnrichedInh(\%table_enriched, $file_enriched_inh);
@@ -32,6 +38,85 @@ main:{
     parseExpressed(\%table_expressed, $file_expressed_exc, $tag_exc);
     parseExpressed(\%table_expressed, $file_expressed_inh, $tag_inh);
     printTableExpressed(\%table_expressed, $file_out_expressed, $tag_exc, $tag_inh);
+
+    parseFoldChange(\%table_foldchange, $file_fc_exc);
+    printTableFoldChange(\%table_foldchange, $file_out_fc);
+}
+
+
+sub printTableFoldChange($$)
+{
+    my $table = $_[0];
+    my $file_out = $_[1];
+    my $delim = ",";
+
+    # construct header
+    my @header = @{$table->{"header"}};
+    my $count = scalar(@header);
+
+    my @default = (0) x $count;
+    my $d = $table->{"data"};
+    open(my $fo, ">", $file_out) or die $!;
+
+    print $fo "protein", $delim, join($delim, @header),"\n";
+    foreach my $key (sort { $d->{$a} <=> $d->{$b} } keys(%$d)) {
+        print $fo $key,$delim;
+        if (exists($d->{$key})) {
+            print $fo join($delim, @{$d->{$key}});
+        }
+        else {
+            print $fo join($delim, @default);
+        }
+        print $fo "\n";
+    }
+
+}
+
+
+sub parseFoldChange($$)
+{
+    my $table = $_[0];
+    my $file = $_[1];
+
+    open(my $fh, "<", $file) or die $!;
+
+    # read header
+    my $line = <$fh>;
+    chomp($line);
+    $line =~ s/P3_+//g;
+    $line =~ s/\"//g;
+    $line = fixBrainRegionsNaming($line);
+
+    my @header = split(",", $line);
+    splice(@header, 0, 1);
+
+    
+    my @colnames = ();
+    foreach my $key (@header) {
+        my $brain = "unknown";
+        my $mouse = "unknown";
+        my $tmp = "";
+
+        ($mouse, $brain, $tmp) = split(/[.]/, $key);
+        
+        $mouse .= '-cre' if($mouse ne 'Unsorted');
+
+        my $col_name = $brain . '.' . $mouse . '.' . $tmp;
+        push(@colnames, $col_name);
+    }
+
+    $table->{"header"} = \@colnames;
+    while(<$fh>) {
+        chomp($_);
+        $_ =~ s/\"//g;
+        my ($protein, @values) = split(",", $_);
+        for my $i (0..$#values) {
+            $values[$i] = 0 if ($values[$i] eq 'NA');
+        }
+        $table->{"data"}{$protein} = \@values;
+    }
+    
+    close($fh);
 }
 
 
