@@ -13,10 +13,8 @@ from layouts.publications import publications
 from layouts.dashboard import dashboard
 from layouts.exports import exports
 import layouts.dbtools as db
-from layouts.plots.plot_expressed import paper_expressed, plot_expressed, update_select_data
-from layouts.plots.plot_enriched import paper_enriched, plot_enriched
-from layouts.plots.plot_cytoscape import plot_cytoscape
 from layouts.table import table_create
+from layouts.plots import plot_boxplot, plot_dotplot, paper_boxplot, paper_dotplot, update_select_data
 
 
 external_stylesheets = [
@@ -73,6 +71,8 @@ df_enriched = db.listToDataFrame(search_list=df_info.index.to_list(),
                                  db_column='protein', db_table='enriched', db_file=db_file)
 df_expressed = db.listToDataFrame(search_list=df_info.index.to_list(), 
                                   db_column='protein', db_table='expressed', db_file=db_file)
+df_foldchange = db.listToDataFrame(search_list=df_info.index.to_list(),
+                                   db_column='protein', db_table='foldchange', db_file=db_file)
 df_info_full = db.tableToDataFrame(db_table='info', db_file=db_file)
 ac_info = db.infoToAutoComplete(df_info=df_info_full)
 
@@ -82,13 +82,14 @@ app.layout = html.Div([
     dcc.Store(id='df-info', data=df_info.to_json()),
     dcc.Store(id='df-enriched', data=df_enriched.to_json()),
     dcc.Store(id='df-expressed', data=df_expressed.to_json()),
+    dcc.Store(id='df-foldchange', data=df_foldchange.to_json()),
     dcc.Store(id='selected-key', storage_type='memory'),
     header(),
     about(),
     publications(),
     dashboard(df_info),
-    dmc.Center(paper_expressed(df_info, df_expressed)),
-    dmc.Center(paper_enriched(df_info, df_enriched)),
+    dmc.Center(paper_boxplot(df_info, df_expressed)),
+    dmc.Center(paper_dotplot(df_info, df_enriched)),
     #dmc.Center(plot_cytoscape()),
     exports(),
     footer(),
@@ -115,7 +116,7 @@ def search_term(searchValue):
 ## ---
 ## select a value from search list
 ## ---
-@callback(
+@app.callback(
     Output("selected-key", "data"),
     Input("search-term", "value")
 )
@@ -219,15 +220,22 @@ def update_plot_expressed_list(df_info_data):
 ## ---
 ## update plot expressed figure
 ## ---
-@callback(
+@app.callback(
     Output('plot-expressed', 'figure'),
     Input('select-term', 'value'),
-    State('df-expressed', 'data')
+    Input('select-abundance', 'value'),
+    State('df-expressed', 'data'),
+    State('df-foldchange', 'data')
 )
-def select_value(key, df_expressed_data):
-    df_expressed = pd.read_json(df_expressed_data)
-    return plot_expressed(df_expressed, key)
+def select_value(key, value, df_expressed_data, df_foldchange_data):
+    df_boxplot = pd.read_json(df_expressed_data)
+    label_yaxis = 'protein abundance'
+    if value == 'fold-change':
+        df_boxplot = pd.read_json(df_foldchange_data)
+        label_yaxis = 'fold change'
+    return plot_boxplot(df_boxplot, key, label_yaxis)
 
+  
 
 ## ---
 ## update plot enriched figure
@@ -240,7 +248,7 @@ def select_value(key, df_expressed_data):
 def update_plot_enriched(df_info_data, df_enriched_data):
     df_info = pd.read_json(df_info_data)
     df_enriched = pd.read_json(df_enriched_data)
-    return plot_enriched(df_info, df_enriched)
+    return plot_dotplot(df_info, df_enriched)
 
 
 

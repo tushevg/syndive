@@ -92,6 +92,7 @@ sub parseFoldChange($$)
 
     
     my @colnames = ();
+    my $colid = 0;
     foreach my $key (@header) {
         my $brain = "unknown";
         my $mouse = "unknown";
@@ -101,7 +102,8 @@ sub parseFoldChange($$)
         
         $mouse .= '-cre' if($mouse ne 'Unsorted');
 
-        my $col_name = $brain . '.' . $mouse . '.' . $tmp;
+        my $col_name = $brain . '.' . $mouse . '.' . $colid;
+        $colid++;
         push(@colnames, $col_name);
     }
 
@@ -123,7 +125,7 @@ sub parseFoldChange($$)
 sub fixBrainRegionsNaming($)
 {
     my $line = $_[0];
-    $line =~ s/BULB|Bulb/OlfactoryBulb/g;
+    $line =~ s/BULB|Bulb/Olfactory Bulb/g;
     $line =~ s/CX/Cortex/g;
     $line =~ s/HC/Hippocampus/g;
     $line =~ s/STR/Striatum/g;
@@ -196,6 +198,7 @@ sub parseExpressed($$$)
     splice(@header, 0, 2);
 
     my @colnames = ();
+    my $colid = 0;
     foreach my $key (@header) {
         my $brain = "unknown";
         my $mouse = "unknown";
@@ -211,12 +214,13 @@ sub parseExpressed($$$)
         elsif($tag eq "inhibitory") {
             $key = "Unsorted" if ($key eq "P2");
             $mouse = $key;
-            $brain = "CorticalInterneurons";
+            $brain = "Cortical IN";
         }
 
         $mouse .= '-cre' if($mouse ne 'Unsorted');
 
-        my $col_name = $brain . '.' . $mouse;
+        my $col_name = $brain . '.' . $mouse . '.' . $colid;
+        $colid++;
         push(@colnames, $col_name);
     }
 
@@ -295,7 +299,7 @@ sub parseEnrichedInh($$)
         my $protein = $line[1];
         my $group = $line[33];
         $group = fixBrainRegionsNaming($group);
-        $group = 'CorticalInterneurons.' . $group;
+        $group = 'Cortical IN.' . $group;
         $group .= "-cre";
         $table_enriched->{"data"}{$protein}{$group}++;
         $table_enriched->{"header"}{$group}++;
