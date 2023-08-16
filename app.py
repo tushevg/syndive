@@ -232,7 +232,7 @@ def select_value(key, value, df_expressed_data, df_foldchange_data):
     label_yaxis = 'protein abundance'
     if value == 'fold-change':
         df_boxplot = pd.read_json(df_foldchange_data)
-        label_yaxis = 'fold change'
+        label_yaxis = 'fold change [log2 sorted/unsorted]'
     return plot_boxplot(df_boxplot, key, label_yaxis)
 
   

@@ -202,7 +202,7 @@ def paper_boxplot(df_info, df_expressed):
         dcc.Graph(id='plot-expressed', figure=plot_boxplot(df_expressed, select_term)),
         dmc.Center(
             dmc.RadioGroup([dmc.Radio('abundance', value='abundance'),
-                                    dmc.Radio('fold-change', value='fold-change')],
+                                    dmc.Radio('fold change (compare between regions)', value='fold-change')],
                     id='select-abundance',
                     value='abundance',
                     size='sm',
