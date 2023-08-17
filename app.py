@@ -5,6 +5,7 @@ import pandas as pd
 from fast_autocomplete import AutoComplete
 from urllib.parse import urlparse, urlunparse
 import os
+import json
 
 from layouts.header import header
 from layouts.footer import footer
@@ -14,7 +15,7 @@ from layouts.dashboard import dashboard
 from layouts.exports import exports
 import layouts.dbtools as db
 from layouts.table import table_create
-from layouts.plots import plot_boxplot, plot_dotplot, paper_boxplot, paper_dotplot, update_select_data
+from layouts.plots import plot_boxplot, plot_dotplot, paper_boxplot, paper_dotplot, update_select_data, paper_cytoscape
 
 
 external_stylesheets = [
@@ -76,6 +77,12 @@ df_foldchange = db.listToDataFrame(search_list=df_info.index.to_list(),
 df_info_full = db.tableToDataFrame(db_table='info', db_file=db_file)
 ac_info = db.infoToAutoComplete(df_info=df_info_full)
 
+# read cytoscape data
+with open('data/cytoscape_info.json', 'r') as f:
+    elements = json.loads(f.read())
+cyto_nodes = elements['nodes']
+cyto_edges = elements['edges']
+
 ### --- LAYOUT --- ###
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -90,7 +97,7 @@ app.layout = html.Div([
     dashboard(df_info),
     dmc.Center(paper_boxplot(df_info, df_expressed)),
     dmc.Center(paper_dotplot(df_info, df_enriched)),
-    #dmc.Center(plot_cytoscape()),
+    dmc.Center(paper_cytoscape(cyto_nodes, cyto_edges, df_info)),
     exports(),
     footer(),
     dcc.Download(id='download')]
@@ -206,15 +213,19 @@ def update_data_frames(key, n_clicks, df_info_data, df_enriched_data, df_express
     [
         Output('table-info', 'children'),
         Output('select-term', 'data'),
-        Output('select-term', 'value')
+        Output('select-term', 'value'),
+        Output('select-cytoscape-term', 'data'),
+        Output('select-cytoscape-term', 'value')
     ],
     Input('df-info', 'data')
 )
 def update_plot_expressed_list(df_info_data):
     df_info = pd.read_json(df_info_data)
+    select_data = update_select_data(df_info)
+    select_term = df_info.index[0]
     return (table_create(df_info),
-        update_select_data(df_info),
-        df_info.index[0])
+        select_data, select_term,
+        select_data, select_term)
 
 
 ## ---
@@ -287,6 +298,107 @@ def export_info(n_clicks, df_info_data, df_enriched_data, df_expressed_data):
     return dict(content=df.to_csv(index=False, encoding='utf-8'), 
                  filename=file_out, type='text/csv')
 
+
+
+
+## ---
+## update plot cytoscape selected
+## ---
+@app.callback(
+    Output('plot-cytoscape', 'elements'),
+    Input('select-cytoscape-term', 'value')
+)
+def select_cyto_value(selected_id):
+    updated_nodes = []
+    for node in cyto_nodes:
+        if node['data']['protein'] == selected_id:
+            node['selected'] = True
+        else:
+            node['selected'] = False
+        updated_nodes.append(node)
+    return updated_nodes + cyto_edges
+
+
+## ---
+## update plot cytoscape colors
+## ---
+@app.callback(
+    Output('plot-cytoscape', 'stylesheet'),
+    Input('select-cytoscape-color', 'value')
+)
+def select_cyto_color(selected_color):
+    background_color = 'data(color_vglut)'
+    if selected_color == 'vglut':
+        background_color = 'data(color_vglut)'
+    elif selected_color == 'vgat':
+        background_color = 'data(color_vgat)'
+    elif selected_color == 'modules':
+        background_color = 'data(color_module)'
+    
+    new_style_sheet = [
+            {
+                'selector': 'node',
+                'style': {
+                    'background-color': background_color,
+                    'label': 'data(gene)'
+                }
+            }, {
+                'selector': 'edge',
+                'style': {
+                    'width': 1,
+                    'line-color': '#778899'
+                }
+            }, {
+                'selector': ':selected',
+                'style': {
+                    'border-width': 10,
+                    'border-color': '#2F4F4F',
+                    'width':100,
+                    'height':100,
+                    'font-size': 100,
+                    'z-index': 1
+                }
+        },
+    ]
+
+    return new_style_sheet
+
+
+
+## ---
+## update plot cytoscape info
+## ---
+@app.callback(
+    Output('text-cytoscape', 'value'),
+    Input('plot-cytoscape', 'selectedNodeData')
+)
+def update_node_info(selected_node_data):
+    info_text = 'No node selected.'
+    if selected_node_data:
+        selected_id = selected_node_data[0]['id']
+        gene = selected_node_data[0]['gene']
+        protein = selected_node_data[0]['protein']
+        module = selected_node_data[0]['module']
+        vglut = selected_node_data[0]['vglut']
+        vgat = selected_node_data[0]['vgat']
+        
+        interactors = []
+        interactors_count = 0
+        for edge in cyto_edges:
+            if edge['data']['source'] == selected_id:
+                interactors.append({'gene': edge['data']['target_gene'], 'freq': edge['data']['freq']})
+                interactors_count = interactors_count + 1
+            if edge['data']['target'] == selected_id:
+                interactors.append({'gene': edge['data']['source_gene'], 'freq': edge['data']['freq']})
+                interactors_count = interactors_count + 1
+
+        sorted_interactors = sorted(interactors, key=lambda x: x['freq'], reverse=True)
+        top_ids = [interactor['gene'] for interactor in sorted_interactors]
+        top_10_ids = top_ids[:10]
+
+        info_text = f"gene: {gene}\nprotein: {protein}\nsynaptic module: {module}\ncorr.VGLUT: {vglut:.3g}\ncorr.VGAT: {vgat:.3g}\ninteractors: {interactors_count}\ntop genes: {', '.join(top_10_ids)}"
+        
+    return info_text
     
 
 if __name__ == '__main__':

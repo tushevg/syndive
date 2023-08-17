@@ -5,3 +5,5 @@ pandas
 fast-autocomplete
 python-Levenshtein
 gunicorn
+dash-cytoscape
+matplotlib

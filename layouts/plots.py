@@ -2,6 +2,7 @@ import plotly.express as px
 import pandas as pd
 import dash_mantine_components as dmc
 from dash import dcc
+import dash_cytoscape as cyto
 
 # define common plots variables
 label_region = ['Cortex', 
@@ -210,3 +211,82 @@ def paper_boxplot(df_info, df_expressed):
                     mt=10)
         )
     ]), shadow='sm', withBorder=True, p='sm', style={'width':'80%', 'margin': '2%'})
+
+
+
+
+def plot_cytoscape(nodes: dict, edges: dict) -> cyto.Cytoscape:
+    style_sheet = [
+            {
+                'selector': 'node',
+                'style': {
+                    'background-color': 'data(color_vglut)',
+                    'label': 'data(gene)'
+                }
+            }, {
+                'selector': 'edge',
+                'style': {
+                    'width': 1,
+                    'line-color': '#778899'
+                }
+            }, {
+                'selector': ':selected',
+                'style': {
+                    'border-width': 10,
+                    'border-color': '#2F4F4F',
+                    'width':100,
+                    'height':100,
+                    'font-size': 100,
+                    'z-index': 1
+                }
+        },
+    ]
+    
+    return cyto.Cytoscape(
+            id='plot-cytoscape',
+            elements=nodes + edges,
+            layout={'name': 'preset'},
+            stylesheet= style_sheet,
+            
+    )
+
+def paper_cytoscape(nodes: dict, edges: dict, df: pd.DataFrame) -> dmc.Paper:
+
+    select_color = dmc.RadioGroup(
+        [dmc.Radio('correlation to VGLUT', value='vglut'),
+        dmc.Radio('correlation to VGAT', value='vgat'),
+        dmc.Radio('synaptic modules', value='modules')],
+        id='select-cytoscape-color',
+        value='vglut',
+        description='pick color scheme',
+        size='xs',
+        mt=5,
+        orientation='vertical')
+    
+    select_candidate = dmc.Select(data=update_select_data(df), 
+        id='select-cytoscape-term', 
+        value=df.index[0],
+        description='pick candidate',
+        size='xs')
+    
+    info_candidate = dmc.Textarea(
+        value='No node selected.',
+        id='text-cytoscape',
+        description='candidate properties',
+        disabled=False,
+        variant='default',
+        size='xs',
+        minRows=10)
+
+    return dmc.Paper(
+        dmc.Center(
+            dmc.Stack([
+                dmc.Text('Synaptic protein-protein correlation network', size='xl'),
+                dmc.Group([
+                    dmc.Stack([select_color, select_candidate, info_candidate]),
+                    plot_cytoscape(nodes, edges)
+                ])
+            ])
+        ),
+    shadow="sm", withBorder=True, p='sm', style={'width':'80%', 'margin':'2%'})
+
