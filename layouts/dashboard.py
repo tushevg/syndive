@@ -14,5 +14,5 @@ def dashboard(df_info: pd.DataFrame) -> html.Div:
     return html.Div(className='section',
                     id='dashboard',
                     children=dmc.Stack([text(), table_create(df_info)],
-                            align='center', justify='center', spacing='xl'))
+                    align='center', justify='center', spacing='xl', p='lg', m='5%', w='90%'))
             

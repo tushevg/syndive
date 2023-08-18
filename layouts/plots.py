@@ -1,7 +1,7 @@
 import plotly.express as px
 import pandas as pd
 import dash_mantine_components as dmc
-from dash import dcc
+from dash import dcc, html
 import dash_cytoscape as cyto
 
 # define common plots variables
@@ -100,8 +100,8 @@ def get_dotplot_df(df_info: pd.DataFrame, df_enriched: pd.DataFrame) -> pd.DataF
 # dot-plot figure
 def plot_dotplot(df_info: pd.DataFrame,
                  df_enriched: pd.DataFrame,
-                 label_yaxis: str = 'gene',
-                 label_title: str = 'Synapse-Type Enrichment') -> px.scatter:
+                 label_yaxis: str = '',
+                 label_title: str = '') -> px.scatter:
     labels = df_info['gene'].to_list()
     df_dotplot = get_dotplot_df(df_info=df_info, df_enriched=df_enriched)
     fig = px.scatter(df_dotplot, x='x', y='y', color='mouse line', opacity=0.8,
@@ -157,7 +157,7 @@ def get_boxplot_df(df: pd.DataFrame, key: str) -> pd.DataFrame:
 # box-plot figure
 def plot_boxplot(df: pd.DataFrame, key: str,
                  label_yaxis: str = 'protein abundance',
-                 label_title: str = 'Synaptic Abundance') -> px.box:
+                 label_title: str = '') -> px.box:
     df_boxplot = get_boxplot_df(df = df, key = key)
     fig = px.box(df_boxplot, x='regions', y='values', 
                 color='cell type',
@@ -178,9 +178,11 @@ def plot_boxplot(df: pd.DataFrame, key: str,
 
 
 def paper_dotplot(df_info, df_expressed):
-    return dmc.Paper(dcc.Graph(id='plot-enriched', 
-                               figure=plot_dotplot(df_info, df_expressed)),
-                    shadow="sm", withBorder=True, p='sm', style={'width':'80%', 'margin':'2%'})
+    return dmc.Paper([
+        dmc.Text('Synapse-Type Enrichment', size='xl', align='center', color='#131516'),
+        dcc.Graph(id='plot-enriched', 
+                               figure=plot_dotplot(df_info, df_expressed))
+    ], shadow="sm", withBorder=True, p='lg', m='5%', w='90%')
 
 
 
@@ -198,19 +200,20 @@ def paper_boxplot(df_info, df_expressed):
     data = update_select_data(df_info)
     select_term = data[0]['value']
 
-    return dmc.Paper(dmc.Stack([
-        dmc.Center(dmc.Select(data=data, id='select-term', value=select_term)),
+    select_boxplot_term = dmc.Select(data=data, id='select-term', value=select_term)
+    select_boxplot_yaxis = dmc.RadioGroup([
+            dmc.Radio('abundance', value='abundance'),
+            dmc.Radio('fold change (compare between regions)', value='fold-change')
+        ], id='select-abundance', value='abundance', size='xs', spacing='xl', mt=10)
+
+    return dmc.Paper([
+        dmc.Text('Synaptic Abundance', size='xl', align='center', color='#131516'),
         dcc.Graph(id='plot-expressed', figure=plot_boxplot(df_expressed, select_term)),
-        dmc.Center(
-            dmc.RadioGroup([dmc.Radio('abundance', value='abundance'),
-                                    dmc.Radio('fold change (compare between regions)', value='fold-change')],
-                    id='select-abundance',
-                    value='abundance',
-                    size='sm',
-                    spacing='xl',
-                    mt=10)
-        )
-    ]), shadow='sm', withBorder=True, p='sm', style={'width':'80%', 'margin': '2%'})
+        dmc.Stack([
+            select_boxplot_yaxis,
+            select_boxplot_term
+        ], align='center')
+    ], shadow='sm', withBorder=True, p='lg', m='5%', w='90%')
 
 
 
@@ -277,16 +280,22 @@ def paper_cytoscape(nodes: dict, edges: dict, df: pd.DataFrame) -> dmc.Paper:
         variant='default',
         size='xs',
         minRows=10)
+    
+    color_bar = dmc.Stack([
+        dmc.Text('color map', color='gray', size='xs'),
+        html.Div([], className="gradient"),
+        dmc.Group([dmc.Text('-1', size='xs'),
+                   dmc.Text('correlation', size='xs'),
+                   dmc.Text('+1', size='xs')], spacing='xl')
+    ], spacing='xs', align='center')
+    
+    
 
-    return dmc.Paper(
-        dmc.Center(
-            dmc.Stack([
-                dmc.Text('Synaptic protein-protein correlation network', size='xl'),
-                dmc.Group([
-                    dmc.Stack([select_color, select_candidate, info_candidate]),
-                    plot_cytoscape(nodes, edges)
-                ])
-            ])
-        ),
-    shadow="sm", withBorder=True, p='sm', style={'width':'80%', 'margin':'2%'})
+    return dmc.Paper([
+        dmc.Text('Synaptic Protein-Protein Correlation Network', size='xl', align='center', color='#131516'),
+        dmc.Group([
+            dmc.Stack([select_color, select_candidate, info_candidate, color_bar]),
+            plot_cytoscape(nodes, edges)
+        ])
+    ],shadow="sm", withBorder=True, p='lg', m='5%', w='90%')
 

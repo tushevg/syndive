@@ -95,9 +95,9 @@ app.layout = html.Div([
     about(),
     publications(),
     dashboard(df_info),
-    dmc.Center(paper_boxplot(df_info, df_expressed)),
-    dmc.Center(paper_dotplot(df_info, df_enriched)),
-    dmc.Center(paper_cytoscape(cyto_nodes, cyto_edges, df_info)),
+    paper_boxplot(df_info, df_expressed),
+    paper_dotplot(df_info, df_enriched),
+    paper_cytoscape(cyto_nodes, cyto_edges, df_info),
     exports(),
     footer(),
     dcc.Download(id='download')]
@@ -144,11 +144,9 @@ def select_term(value):
 ## update data frames based on selected gene or deleted row
 ## ---
 @app.callback(
-    [
-        Output('df-info', 'data'),
-        Output('df-enriched', 'data'),
-        Output('df-expressed', 'data')
-    ],
+    Output('df-info', 'data'),
+    Output('df-enriched', 'data'),
+    Output('df-expressed', 'data'),
     Input('selected-key', 'data'),
     Input({'type':'remove-button', 'index': ALL}, 'n_clicks'),
     State('df-info', 'data'),
@@ -210,13 +208,11 @@ def update_data_frames(key, n_clicks, df_info_data, df_enriched_data, df_express
 ## update info dependent data
 ## ---
 @app.callback(
-    [
-        Output('table-info', 'children'),
-        Output('select-term', 'data'),
-        Output('select-term', 'value'),
-        Output('select-cytoscape-term', 'data'),
-        Output('select-cytoscape-term', 'value')
-    ],
+    Output('table-info', 'children'),
+    Output('select-term', 'data'),
+    Output('select-term', 'value'),
+    Output('select-cytoscape-term', 'data'),
+    Output('select-cytoscape-term', 'value'),
     Input('df-info', 'data')
 )
 def update_plot_expressed_list(df_info_data):
@@ -306,7 +302,8 @@ def export_info(n_clicks, df_info_data, df_enriched_data, df_expressed_data):
 ## ---
 @app.callback(
     Output('plot-cytoscape', 'elements'),
-    Input('select-cytoscape-term', 'value')
+    Input('select-cytoscape-term', 'value'),
+    prevent_initial_callbacks=False
 )
 def select_cyto_value(selected_id):
     updated_nodes = []
@@ -375,31 +372,17 @@ def select_cyto_color(selected_color):
 def update_node_info(selected_node_data):
     info_text = 'No node selected.'
     if selected_node_data:
-        selected_id = selected_node_data[0]['id']
-        gene = selected_node_data[0]['gene']
-        protein = selected_node_data[0]['protein']
-        module = selected_node_data[0]['module']
-        vglut = selected_node_data[0]['vglut']
-        vgat = selected_node_data[0]['vgat']
+        # selected_id = selected_node_data[0]['id']
+        gene = f"gene: {selected_node_data[0]['gene']}\n"
+        protein = f"protein: {selected_node_data[0]['protein']}\n"
+        module = f"synaptic module: {selected_node_data[0]['module']}\n"
+        vglut = f"corr.VGLUT: {selected_node_data[0]['vglut']:.3g}\n"
+        vgat = f"corr.VGAT: {selected_node_data[0]['vgat']:.3g}\n"
+        interactors = f"interactors: {selected_node_data[0]['interactors']}\n"
+        interactors_top = f"strongest interactors: {selected_node_data[0]['interactors_top']}\n"
+        info_text = gene + protein + module + vglut + vgat + interactors + interactors_top
         
-        interactors = []
-        interactors_count = 0
-        for edge in cyto_edges:
-            if edge['data']['source'] == selected_id:
-                interactors.append({'gene': edge['data']['target_gene'], 'freq': edge['data']['freq']})
-                interactors_count = interactors_count + 1
-            if edge['data']['target'] == selected_id:
-                interactors.append({'gene': edge['data']['source_gene'], 'freq': edge['data']['freq']})
-                interactors_count = interactors_count + 1
-
-        sorted_interactors = sorted(interactors, key=lambda x: x['freq'], reverse=True)
-        top_ids = [interactor['gene'] for interactor in sorted_interactors]
-        top_10_ids = top_ids[:10]
-
-        info_text = f"gene: {gene}\nprotein: {protein}\nsynaptic module: {module}\ncorr.VGLUT: {vglut:.3g}\ncorr.VGAT: {vgat:.3g}\ninteractors: {interactors_count}\ntop genes: {', '.join(top_10_ids)}"
-        
-    return info_text
-    
+    return info_text 
 
 if __name__ == '__main__':
     app.run(debug=True, port=8051)

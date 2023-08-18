@@ -116,28 +116,15 @@ def select_cyto_color(selected_color):
 def update_node_info(selected_node_data):
     info_text = 'No node selected.'
     if selected_node_data:
-        selected_id = selected_node_data[0]['id']
-        gene = selected_node_data[0]['gene']
-        protein = selected_node_data[0]['protein']
-        module = selected_node_data[0]['module']
-        vglut = selected_node_data[0]['vglut']
-        vgat = selected_node_data[0]['vgat']
-        
-        interactors = []
-        interactors_count = 0
-        for edge in cyto_edges:
-            if edge['data']['source'] == selected_id:
-                interactors.append({'gene': edge['data']['target_gene'], 'freq': edge['data']['freq']})
-                interactors_count = interactors_count + 1
-            if edge['data']['target'] == selected_id:
-                interactors.append({'gene': edge['data']['source_gene'], 'freq': edge['data']['freq']})
-                interactors_count = interactors_count + 1
-
-        sorted_interactors = sorted(interactors, key=lambda x: x['freq'], reverse=True)
-        top_ids = [interactor['gene'] for interactor in sorted_interactors]
-        top_10_ids = top_ids[:10]
-
-        info_text = f"gene: {gene}\nprotein: {protein}\nsynaptic module: {module}\ncorr.VGLUT: {vglut:.3g}\ncorr.VGAT: {vgat:.3g}\ninteractors: {interactors_count}\ntop genes: {', '.join(top_10_ids)}"
+        # selected_id = selected_node_data[0]['id']
+        gene = f"gene: {selected_node_data[0]['gene']}\n"
+        protein = f"protein: {selected_node_data[0]['protein']}\n"
+        module = f"synaptic module: {selected_node_data[0]['module']}\n"
+        vglut = f"corr.VGLUT: {selected_node_data[0]['vglut']:.3g}\n"
+        vgat = f"corr.VGAT: {selected_node_data[0]['vgat']:.3g}\n"
+        interactors = f"interactors: {selected_node_data[0]['interactors']}\n"
+        interactors_top = f"strongest interactors: {selected_node_data[0]['interactors_top']}\n"
+        info_text = gene + protein + module + vglut + vgat + interactors + interactors_top
         
     return info_text
 
