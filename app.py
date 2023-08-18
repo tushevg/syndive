@@ -378,8 +378,8 @@ def update_node_info(selected_node_data):
         module = f"synaptic module: {selected_node_data[0]['module']}\n"
         vglut = f"corr.VGLUT: {selected_node_data[0]['vglut']:.3g}\n"
         vgat = f"corr.VGAT: {selected_node_data[0]['vgat']:.3g}\n"
-        interactors = f"interactors: {selected_node_data[0]['interactors']}\n"
-        interactors_top = f"strongest interactors: {selected_node_data[0]['interactors_top']}\n"
+        interactors = f"neighbours: {selected_node_data[0]['interactors']}\n"
+        interactors_top = f"strongest correlates: {selected_node_data[0]['interactors_top']}\n"
         info_text = gene + protein + module + vglut + vgat + interactors + interactors_top
         
     return info_text 

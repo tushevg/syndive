@@ -282,7 +282,7 @@ def paper_cytoscape(nodes: dict, edges: dict, df: pd.DataFrame) -> dmc.Paper:
         minRows=10)
     
     color_bar = dmc.Stack([
-        dmc.Text('color map', color='gray', size='xs'),
+        dmc.Text('color map', color='gray', size=10, align='left'),
         html.Div([], className="gradient"),
         dmc.Group([dmc.Text('-1', size='xs'),
                    dmc.Text('correlation', size='xs'),
