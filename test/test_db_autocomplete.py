@@ -1,19 +1,29 @@
 import sqlite3
 import pandas as pd
 from fast_autocomplete import AutoComplete
+import time
 
 import sys
 sys.path.append('/Users/tushevg/Desktop/syndive')
 import layouts.dbtools as db
 
-db_file='data/mpibr_synprot.db'
-df_info = db.tableToDataFrame(db_table='info', db_file=db_file)
-print(len(df_info))
-ac = db.infoToAutoComplete(df_info=df_info)
-list = db.matchAutoComplete('Calm', ac)
+db_file='data/mpibr_test.db'
+start = time.time()
+df = db.termToDataFrame('P11798', 'protein', 'foldchange', db_file)
+end = time.time()
+print(len(df))
+print(df)
+print(end - start)
 
-print(list)
-print(len(list))
+
+# db_file='data/mpibr_synprot.db'
+# df_info = db.tableToDataFrame(db_table='info', db_file=db_file)
+# print(len(df_info))
+# ac = db.infoToAutoComplete(df_info=df_info)
+# list = db.matchAutoComplete('Calm', ac)
+
+# print(list)
+# print(len(list))
 #print(db.keyAutoComplete('Camk2a', ac))
 
 # query_list = ['Gad1', 'Gad2', 'Dlg4', 

@@ -23,6 +23,18 @@ body {
     display: inline-block;
 }
 
+
+.header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0.95); /* Adjust background color as needed */
+    padding: 2%;
+    z-index: 100; /* Ensure header is above other elements */
+  }
+
+
 .section {
     height: 80vh;
     display: flex;

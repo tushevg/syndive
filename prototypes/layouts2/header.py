@@ -1,7 +1,7 @@
 import dash_mantine_components as dmc
 from dash import html
 from dash_iconify import DashIconify
-from layouts.searchbar import searchbar
+from layouts2.searchbar import searchbar
 
 def logo():
     return dmc.Anchor(dmc.Text('SYNDIVE', 
@@ -32,6 +32,6 @@ def header():
                         menu_link('Dashboard', '#dashboard'),
                         menu_link('Exports', '#exports')
                     ], 'position', 'left'),
-                    searchbar('id-searchbar-header', {'display': 'block'}, '25%', '25%')
+                    searchbar('id-searchbar-header', {'display': 'none'}, '25%')
                 ]
             )

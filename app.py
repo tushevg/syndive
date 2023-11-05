@@ -84,7 +84,9 @@ cyto_nodes = elements['nodes']
 cyto_edges = elements['edges']
 
 ### --- LAYOUT --- ###
-app.layout = html.Div([
+app.layout = dmc.Container(
+    id='id-layout', fluid=True,
+    children = [
     dcc.Location(id='url', refresh=False),
     dcc.Store(id='df-info', data=df_info.to_json()),
     dcc.Store(id='df-enriched', data=df_enriched.to_json()),
@@ -108,25 +110,31 @@ app.layout = html.Div([
 ## ---
 ## update search list based on auto complete
 ## ---
-@app.callback(
-    Output("search-term", "data"),
-    Input("search-term", "searchValue")
-)
-def search_term(searchValue):
+def update_search_list(searchValue):
     list = db.matchAutoComplete(searchValue, ac_info)
-    if (len(list) > 0):
-        return list
-    else:
+    if len(list) == 0:
         raise PreventUpdate
+    return list
 
+@app.callback(
+    Output("id-searchbar-header", "data"),
+    Input("id-searchbar-header", "searchValue")
+)
+def update_searchbar_header(searchValue):
+    return update_search_list(searchValue)
+
+@app.callback(
+    Output("id-searchbar-about", "data"),
+    Input("id-searchbar-about", "searchValue")
+)
+def update_searchbar_about(searchValue):
+    return update_search_list(searchValue)
+
+    
 
 ## ---
 ## select a value from search list
 ## ---
-@app.callback(
-    Output("selected-key", "data"),
-    Input("search-term", "value")
-)
 def select_term(value):
     if not value:
         raise PreventUpdate
@@ -138,6 +146,20 @@ def select_term(value):
                        db_file=db_file)
     
     return key
+
+@app.callback(
+    Output("selected-key", "data"),
+    Input("id-searchbar-header", "value"),
+    Input("id-searchbar-about", "value")
+)
+def select_term_callback(value_header, value_about):
+    if value_header:
+        return select_term(value_header)
+    elif value_about:
+        return select_term(value_about)
+    else:
+        raise PreventUpdate
+
 
 
 ## ---
@@ -154,6 +176,14 @@ def select_term(value):
     State('df-expressed', 'data')
 )
 def update_data_frames(key, n_clicks, df_info_data, df_enriched_data, df_expressed_data):
+
+    # scroll to the table using JavaScript
+    scroll_js = """
+    var tableElement = document.getElementById('table-info');
+    if (tableElement) {
+        tableElement.scrollIntoView({ behavior: 'smooth' });
+    }
+    """
 
     # convert json to data.frame
     df_info = pd.read_json(df_info_data)
@@ -267,25 +297,39 @@ def update_plot_enriched(df_info_data, df_enriched_data):
     Input({'type':'export-button', 'index': ALL}, 'n_clicks'),
     State('df-info', 'data'),
     State('df-enriched', 'data'),
-    State('df-expressed', 'data')
+    State('df-expressed', 'data'),
+    State('id-radiogroup-export', 'value')
 )
-def export_info(n_clicks, df_info_data, df_enriched_data, df_expressed_data):
+def export_info(n_clicks, df_info_data, df_enriched_data, df_expressed_data, export_type):
     if n_clicks == 0:
         PreventUpdate
 
     triggered_id = ctx.triggered_id['index']
     
     if triggered_id == 'export-info':
-        df = pd.read_json(df_info_data)
+        if export_type == 'table':
+            df = pd.read_json(df_info_data)
+            file_out = 'syndive_proteinInfo_table.csv'
+        else:
+            df = db.tableToDataFrame(db_table='info', db_file=db_file)
+            file_out = 'syndive_proteinInfo_rawdata.csv'
         df = df[['gene', 'product']]
-        file_out = 'syndive_proteinInfo.csv'
+        
     elif triggered_id == 'export-enrichment':
-        df = pd.read_json(df_enriched_data)
-        file_out = 'syndive_proteinEnriched.csv'
+        if export_type == 'table':
+            df = pd.read_json(df_enriched_data)
+            file_out = 'syndive_proteinEnriched_table.csv'
+        else:
+            df = db.tableToDataFrame(db_table='enriched', db_file=db_file)
+            file_out = 'syndive_proteinEnriched_rawdata.csv'
         PreventUpdate
     elif triggered_id == 'export-abundance':
-        df = pd.read_json(df_expressed_data)
-        file_out = 'syndive_proteinExpressed.csv'
+        if export_type == 'table':
+            df = pd.read_json(df_expressed_data)
+            file_out = 'syndive_proteinExpressed_table.csv'
+        else:
+            df = db.tableToDataFrame(db_table='expressed', db_file=db_file)
+            file_out = 'syndive_proteinExpressed_rawdata.csv'
         PreventUpdate
     else:
         PreventUpdate

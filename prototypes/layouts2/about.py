@@ -1,6 +1,9 @@
 import dash_mantine_components as dmc
 from dash import html
-from layouts.searchbar import searchbar
+from layouts2.searchbar import searchbar
+
+from dash_intersection_observer import DashIntersectionObserver
+
 
 def title():
     text = 'Synaptic Diversity Hub'
@@ -38,13 +41,20 @@ def about():
             align='center',
             justify='center',
             spacing='xl',
-            maw='80%',
             children=[
                 title(),
                 dmc.Space(h='5%'),
                 summary(),
                 dmc.Space(h='5%'),
-                searchbar('id-searchbar-about', {'display':'block'}, '80%', '60%'),
+                dmc.Center(
+                    w='100%',
+                children=DashIntersectionObserver(
+                    id='id-observer',
+                    children=searchbar('id-searchbar-about', {'display':'block'}, '80%'),
+                    threshold=0.1,
+                    triggerOnce=False,
+                    style={'width':'80%'}
+                )),
                 dmc.Space(h='5%'),
                 dmc.Group([button_left(), button_right()], position='center')
             ])
