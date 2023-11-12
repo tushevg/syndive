@@ -53,10 +53,10 @@ def cards():
     paper_1 = paper_card(
         'The proteomic landscape of synaptic diversity across brain regions and cell types',
         'van Oostrum et. al., 2023',
-        'bioRxiv',
+        'Cell',
         'Exploring the proteomic diversity of neuronal synapses, we identify thousands of unique proteins and protein modules associated with specific synapse types.',
-        'https://doi.org/10.1101/2023.01.27.525780',
-        'red',
+        'https://www.sciencedirect.com/science/article/pii/S0092867423010826',
+        'blue',
         'assets/fig_mark.png'
     )
 

@@ -28,6 +28,6 @@ def exports():
                             dmc.Button('abundance', size='lg', color='light', variant='default', id={'type':'export-button', 'index':'export-abundance'}),
                             dmc.Button('enrichment', size='lg', color='dark', id={'type':'export-button', 'index':'export-enrichment'})
                         ]),
-                        dmc.Text('van Oostrum et. al., 2023', size='lg', color='gray', weight=200, id='debug-export'),
+                        dmc.Text('van Oostrum et. al., Cell, 2023', size='lg', color='gray', weight=200, id='debug-export'),
                     ],align='center', justify='center', spacing='xl')
             )
