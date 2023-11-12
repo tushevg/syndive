@@ -2,26 +2,124 @@ import dash_mantine_components as dmc
 from dash import Output, Input, clientside_callback, html, dcc, page_container, State
 from dash_iconify import DashIconify
 
+def create_nav_link(name, href):
+    return dmc.NavLink(
+        children=dmc.Text(name, size='md', weight=200),
+        href=href, 
+        className='hover-darken'
+        )
+
+
+# raw components
+page_links=['About', 'Publications', 'Dashboard', 'Exports']
+
+
+
+
+
+
 def create_logo():
     return dmc.Anchor(
         children=dmc.Text('syndive',
-                          size='sm', 
+                          size='xl', 
                           color='#9400D3',
                           transform='uppercase',
                           ff='DesktopPublishing'),
         href='/',
         underline=False)              
 
-def create_header_link(name, href, color='indigo'):
-    return dmc.Anchor()
+
+def create_nav_link(name, href):
+    return dmc.NavLink(
+        children=dmc.Text(name, size='md', weight=200),
+        href=href, 
+        className='hover-darken'
+        )
 
 
-def create_header(nav_data):
-    return dmc.Header()
+def create_searchbar(id, style, mw, w):
+    return dmc.Select(
+        id=id,
+        style=style,
+        placeholder='Search gene or portein ...',
+        data=[],
+        maw=mw,
+        w=w,
+        searchable=True,
+        limit=20,
+        clearable=True,
+        icon=dmc.ThemeIcon(DashIconify(icon="ci:search-magnifying-glass", flip='horizontal'))
+    )
 
 
 
-def create_appshell(nav_data):
+def create_header():
+    return dmc.Header(
+        id='id-header',
+        className='header',
+        height='8%',
+        p = '2%',
+        position='top',
+        fixed=True,
+        children=[
+            dmc.Group(
+            position='left',
+            children=[create_logo(),
+                      dmc.Space(w='5%'),
+                      create_nav_link('About', '/about'),
+                      create_nav_link('Publications', '/publications'),
+                      create_nav_link('Dashboard', '/dashboard'),
+                      create_nav_link('Exports', '/exports')]),
+            dmc.Space(w='5%'),
+            create_searchbar('id-searchbar-header', {'display': 'block'}, '25%', '25%')]
+        )
+
+
+def create_side_nav_content():
+    return dmc.Stack(
+        children=[
+
+        ]
+    )
+
+
+def create_side_navbar():
+    return dmc.Navbar(
+        fixed=True,
+        id="components-navbar",
+        position={"top": 70},
+        width={"base": 300},
+        children=[
+            dmc.ScrollArea(
+                offsetScrollbars=True,
+                type="scroll",
+                children=create_side_nav_content(),
+            )
+        ],
+    )
+
+
+def create_navbar_drawer():
+    return dmc.Drawer(
+        id="components-navbar-drawer",
+        overlayOpacity=0.55,
+        overlayBlur=3,
+        zIndex=9,
+        size=300,
+        children=[
+            dmc.ScrollArea(
+                offsetScrollbars=True,
+                type="scroll",
+                style={"height": "100vh"},
+                pt=20,
+                children=create_side_nav_content(),
+            )
+        ],
+    )
+
+
+
+def create_appshell():
     return dmc.MantineProvider(
         dmc.MantineProvider(
             theme={
@@ -39,9 +137,9 @@ def create_appshell(nav_data):
                 dcc.Location(id="url", refresh="callback-nav"),
                 dmc.NotificationsProvider(
                     [
-                        create_header(nav_data),
-                        create_side_navbar(nav_data),
-                        create_navbar_drawer(nav_data),
+                        create_header(),
+                        #create_side_navbar(),
+                        #create_navbar_drawer(),
                         html.Div(
                             dmc.Container(size="lg", pt=90, children=page_container),
                             id="wrapper",
