@@ -55,7 +55,7 @@ def get_dotplot_df(df_info: pd.DataFrame, df_enriched: pd.DataFrame) -> pd.DataF
     val_mouseline = []
     val_xoffset = [-0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3]
     for protein, row in df_info.iterrows():
-        gene = row[0]
+        gene = row.iloc[0]
         y = y + 1
         nonenriched_region = label_region.copy()
         # check if enriched

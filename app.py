@@ -1,4 +1,4 @@
-from dash import Dash, dcc, html, callback, Output, Input, State, ctx, ALL
+from dash import Dash, dcc, html, callback, Output, Input, State, ctx, ALL, clientside_callback
 from dash.exceptions import PreventUpdate
 import dash_mantine_components as dmc
 import pandas as pd
@@ -116,6 +116,7 @@ def update_search_list(searchValue):
         raise PreventUpdate
     return list
 
+
 @app.callback(
     Output("id-searchbar-header", "data"),
     Input("id-searchbar-header", "searchValue")
@@ -176,15 +177,6 @@ def select_term_callback(value_header, value_about):
     State('df-expressed', 'data')
 )
 def update_data_frames(key, n_clicks, df_info_data, df_enriched_data, df_expressed_data):
-
-    # scroll to the table using JavaScript
-    scroll_js = """
-    var tableElement = document.getElementById('table-info');
-    if (tableElement) {
-        tableElement.scrollIntoView({ behavior: 'smooth' });
-    }
-    """
-
     # convert json to data.frame
     df_info = pd.read_json(df_info_data)
     df_enriched = pd.read_json(df_enriched_data)
@@ -232,6 +224,8 @@ def update_data_frames(key, n_clicks, df_info_data, df_enriched_data, df_express
     return (df_info.to_json(),
             df_enriched.to_json(),
             df_expressed.to_json())
+
+
 
 
 ## ---

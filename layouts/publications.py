@@ -52,7 +52,7 @@ def cards():
     # Paper 1
     paper_1 = paper_card(
         'The proteomic landscape of synaptic diversity across brain regions and cell types',
-        'van Oostrum et. al., 2023',
+        'van Oostrum et al., 2023',
         'Cell',
         'Exploring the proteomic diversity of neuronal synapses, we identify thousands of unique proteins and protein modules associated with specific synapse types.',
         'https://www.sciencedirect.com/science/article/pii/S0092867423010826',
@@ -71,7 +71,18 @@ def cards():
         'assets/fig_caspar.png'
     )
 
-    return dmc.Group([paper_1,],
+    # Paper 2
+    paper_3 = paper_card(
+        'The molecular diversity of hippocampal regions and strata at synaptic resolution revealed by integrated transcriptomic and proteomic profiling',
+        'Kaulich and Waselenchuk et al., in preparation',
+        'bioRxiv',
+        'Integrated transcriptomic and proteomic profiling identifies molecular signatures of hippocampal subregions and CA1 strata in tissue and synapses.',
+        'https://www.biorxiv.org/',
+        'red',
+        'assets/fig_kaulich.png'
+    )
+
+    return dmc.Group([paper_1, paper_3],
         align="stretch",
         position="center",
         spacing="sm",
