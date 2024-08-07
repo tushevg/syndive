@@ -77,7 +77,7 @@ def cards():
         'Kaulich and Waselenchuk et al., in preparation',
         'bioRxiv',
         'Integrated transcriptomic and proteomic profiling identifies molecular signatures of hippocampal subregions and CA1 strata in tissue and synapses.',
-        'https://www.biorxiv.org/',
+        'https://www.biorxiv.org/content/10.1101/2024.08.05.606570v1',
         'red',
         'assets/fig_kaulich.png'
     )
